@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Briefcase } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import InterviewAlert from '../alerts/InterviewAlert';
-// const BASE_API_URL = import.meta.env.VITE_API_URL; // Unused variable removed
 
 const CandidateAppliedJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -16,14 +15,20 @@ const CandidateAppliedJobs = () => {
 
   const navigate = useNavigate();
 
+  // Debug function to log what's happening
+  const debugLog = (message, data) => {
+    console.log(`DEBUG: ${message}`, data);
+  };
+
   useEffect(() => {
-    // Handle API calls separately to better isolate errors
+    debugLog("Component mounted", null);
     const loadData = async () => {
       try {
+        debugLog("Starting data fetch", null);
         await fetchCandidateId();
         await fetchAppliedJobs();
       } catch (err) {
-        console.error('Error loading data:', err);
+        console.error('Error in initial data load:', err);
         setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
@@ -35,22 +40,44 @@ const CandidateAppliedJobs = () => {
 
   const fetchCandidateId = async () => {
     try {
+      debugLog("Fetching candidate ID", null);
       const response = await axiosInstance.get('chat/current-candidate/');
-      if (response && response.data) {
+      if (response && response.data && response.data.id) {
+        debugLog("Candidate ID fetched", response.data.id);
         setCandidateId(response.data.id);
+      } else {
+        console.warn("Candidate ID response was invalid", response);
       }
     } catch (err) {
       console.error('Error fetching candidate ID:', err);
-      // Don't set loading to false here, as we still need to fetch jobs
     }
   };
 
   const fetchAppliedJobs = async () => {
     try {
+      debugLog("Fetching applied jobs", null);
       const response = await axiosInstance.get('job_posting/candidate/applied-jobs/');
+      
       if (response && response.data) {
-        setJobs(Array.isArray(response.data) ? response.data : []);
+        // Make sure we're dealing with an array
+        const jobsData = Array.isArray(response.data) ? response.data : [];
+        debugLog(`Jobs fetched: ${jobsData.length}`, jobsData);
+        
+        // Clean up the data to ensure it's safe for rendering
+        const cleanedJobs = jobsData.map(job => ({
+          ...job,
+          id: job.id || Math.random().toString(36).substr(2, 9),
+          title: job.title || 'Untitled Job',
+          description: job.description || 'No description available',
+          skills: Array.isArray(job.skills) ? job.skills : [],
+          experience_level: job.experience_level || 'Not specified',
+          location: job.location || 'Not specified',
+          application_date: job.application_date || null
+        }));
+        
+        setJobs(cleanedJobs);
       } else {
+        debugLog("No jobs data in response", response);
         setJobs([]);
       }
     } catch (err) {
@@ -60,30 +87,39 @@ const CandidateAppliedJobs = () => {
     }
   };
 
-  const handleSeeDetails = (job) => {
-    navigate('/job-details', { state: { job } });
-  };
-
   const handleStartInterview = (job) => {
+    debugLog("Starting interview for job", job.id);
     setSelectedJob(job);
     setShowDialog(true);
   };
 
   const handleProceed = () => {
-    if (selectedJob) {
+    if (selectedJob && candidateId) {
+      debugLog("Proceeding to face verification", {
+        jobId: selectedJob.id,
+        candidateId: candidateId
+      });
+      
       navigate('/face-verification', {
         state: {
           jobId: selectedJob.id,
           candidateId: candidateId,
           jobTitle: selectedJob.title,
-          candidateName: selectedJob.full_name
+          candidateName: selectedJob.full_name || 'Candidate'
         }
       });
       setShowDialog(false);
+    } else {
+      console.error("Cannot proceed - missing job or candidate ID", {
+        selectedJob,
+        candidateId
+      });
     }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'Date unavailable';
+    
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -96,7 +132,17 @@ const CandidateAppliedJobs = () => {
     }
   };
 
-  // Render loading state
+  // Safe render method to prevent React child errors
+  const safeRender = (content) => {
+    if (content === null || content === undefined) {
+      return '';
+    }
+    if (typeof content === 'object') {
+      return JSON.stringify(content);
+    }
+    return content;
+  };
+
   if (loading) {
     return (
       <div className="page-container">
@@ -107,12 +153,11 @@ const CandidateAppliedJobs = () => {
     );
   }
 
-  // Render error state
   if (error) {
     return (
       <div className="page-container">
         <div className="error-container">
-          <p className="error-text">Error: {error}</p>
+          <p className="error-text">Error: {safeRender(error)}</p>
           <button 
             className="btn btn-primary mt-4" 
             onClick={() => window.location.reload()}
@@ -139,9 +184,9 @@ const CandidateAppliedJobs = () => {
 
         <div className="grid-container">
           {jobs && jobs.length > 0 ? (
-            jobs.map((job) => (
+            jobs.map((job, index) => (
               <div
-                key={job.id || index} // Fallback to index if id is missing
+                key={`job-${index}-${job.id || ''}`}
                 className={`card ${hoveredId === job.id ? 'card-hovered' : ''}`}
                 onMouseEnter={() => setHoveredId(job.id)}
                 onMouseLeave={() => setHoveredId(null)}
@@ -155,31 +200,31 @@ const CandidateAppliedJobs = () => {
                   <div className="card-header" style={{ position: 'relative' }}>
                     <div className="flex items-center gap-2">
                       <Briefcase className="text-gray-600" size={20} />
-                      <h3 className="card-title1">{job.title || 'Untitled Job'}</h3>
+                      <h3 className="card-title1">{safeRender(job.title)}</h3>
                     </div>
-                    <div className="time-badge-aligned" >
+                    <div className="time-badge-aligned">
                       <Clock size={14} />
-                      <span>{job.application_date ? formatDate(job.application_date) : 'Date unavailable'}</span>
+                      <span>{formatDate(job.application_date)}</span>
                     </div>
                   </div>
 
                   <div className="card-body1">
                     <div className="info-section1">
                       <h4 className="section-title1">Description</h4>
-                      <p className="description-text1">{job.description || 'No description available'}</p>
+                      <p className="description-text1">{safeRender(job.description)}</p>
                     </div>
 
                     <div className="info-section1">
                       <h4 className="section-title1">Required Skills</h4>
                       <div className="tags-container1">
                         {Array.isArray(job.skills) && job.skills.length > 0 ? (
-                          job.skills.map((skill, index) => (
+                          job.skills.map((skill, skillIndex) => (
                             <span 
-                              key={index} 
+                              key={`skill-${index}-${skillIndex}`}
                               className="tag skill-tag"
                               style={{ display: 'inline-block' }}
                             >
-                              {skill}
+                              {safeRender(skill)}
                             </span>
                           ))
                         ) : (
@@ -190,12 +235,12 @@ const CandidateAppliedJobs = () => {
 
                     <div className="info-section1">
                       <h4 className="section-title1">Experience Level</h4>
-                      <p className="text">{job.experience_level || 'Not specified'}</p>
+                      <p className="text">{safeRender(job.experience_level)}</p>
                     </div>
 
                     <div className="info-section1">
                       <h4 className="section-title1">Location</h4>
-                      <p className="text">{job.location || 'Not specified'}</p>
+                      <p className="text">{safeRender(job.location)}</p>
                     </div>
 
                     <div className="button-group">
@@ -219,8 +264,7 @@ const CandidateAppliedJobs = () => {
         </div>
       </div>
       
-      {/* Only render InterviewAlert if it's imported correctly */}
-      {InterviewAlert && (
+      {showDialog && (
         <InterviewAlert
           open={showDialog}
           onClose={() => setShowDialog(false)}
