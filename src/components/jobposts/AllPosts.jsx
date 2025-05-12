@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft as ArrowLeftIcon, Clock as ClockIcon, Search as SearchIcon, Filter as FilterIcon,Briefcase } from 'lucide-react';
+import { ArrowLeft as ArrowLeftIcon, Clock as ClockIcon, Search as SearchIcon, Filter as FilterIcon, Briefcase } from 'lucide-react';
 import '../../styles/JobPosts.css';
-import "../../styles/filter.css"; // Assuming AllPosts uses filter.css
+import "../../styles/filter.css";
 import { useUser } from '../context/UserContext';
 const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const AllPosts = () => {
-  const { name, profileImage } = useUser();
+  // Remove unused destructured values if they're causing errors
+  const { name, profileImage } = useUser() || {};
   
   const [allJobs, setAllJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
@@ -19,34 +20,52 @@ const AllPosts = () => {
     experience_level: '',
     skills: '',
     posted_within: '',
-    jobTitle: '', // Added new filter for job title
+    jobTitle: '',
   });
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch jobs
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
-      const accessToken = localStorage.getItem('access');
-      
       try {
+        const accessToken = localStorage.getItem('access');
+        if (!accessToken) {
+          console.warn("No access token found");
+        }
+        
         const response = await fetch(`${BASE_API_URL}/api/job_posting/publicposts/`, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`
+            'Authorization': accessToken ? `Bearer ${accessToken}` : ''
           }
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch jobs');
+          throw new Error(`Failed to fetch jobs: ${response.status}`);
         }
 
         const data = await response.json();
-        // Sort jobs by date before setting them
-        const sortedJobs = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        setAllJobs(sortedJobs);
-        setFilteredJobs(sortedJobs);
+        
+        // Ensure data is an array before sorting
+        if (Array.isArray(data)) {
+          // Add defensive check for created_at property
+          const sortedJobs = data.sort((a, b) => {
+            const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
+            const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
+            return dateB - dateA;
+          });
+          
+          setAllJobs(sortedJobs);
+          setFilteredJobs(sortedJobs);
+        } else {
+          console.error("Expected array from API but got:", data);
+          setAllJobs([]);
+          setFilteredJobs([]);
+        }
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching jobs:", err);
+        setError(err.message || "Failed to load jobs");
       } finally {
         setLoading(false);
       }
@@ -55,38 +74,48 @@ const AllPosts = () => {
     fetchJobs();
   }, []);
 
+  // Apply filters
   useEffect(() => {
+    if (!Array.isArray(allJobs) || allJobs.length === 0) {
+      setFilteredJobs([]);
+      return;
+    }
+
     let result = [...allJobs];
 
     // Apply search filter
-    if (searchTerm.trim()) {
+    if (searchTerm && searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase().trim();
       result = result.filter(job => 
-        job.title.toLowerCase().includes(searchLower) ||
-        job.description.toLowerCase().includes(searchLower)
+        (job.title && job.title.toLowerCase().includes(searchLower)) ||
+        (job.description && job.description.toLowerCase().includes(searchLower))
       );
     }
 
     // Apply job title filter
-    if (filters.jobTitle.trim()) {
+    if (filters.jobTitle && filters.jobTitle.trim()) {
       const titleLower = filters.jobTitle.toLowerCase().trim();
       result = result.filter(job => 
-        job.title.toLowerCase().includes(titleLower)
+        job.title && job.title.toLowerCase().includes(titleLower)
       );
     }
 
     // Apply experience level filter
     if (filters.experience_level) {
       result = result.filter(job => 
-        job.experience_level.toLowerCase() === filters.experience_level.toLowerCase()
+        job.experience_level && job.experience_level.toLowerCase() === filters.experience_level.toLowerCase()
       );
     }
 
     // Apply skills filter
-    if (filters.skills.trim()) {
+    if (filters.skills && filters.skills.trim()) {
       const searchSkills = filters.skills.toLowerCase().split(',').map(skill => skill.trim());
       result = result.filter(job => {
-        const jobSkills = job.skills.map(skill => skill.toLowerCase());
+        // Add null check for skills
+        const jobSkills = Array.isArray(job.skills) 
+          ? job.skills.map(skill => typeof skill === 'string' ? skill.toLowerCase() : '')
+          : [];
+        
         return searchSkills.some(searchSkill => 
           jobSkills.some(jobSkill => jobSkill.includes(searchSkill))
         );
@@ -96,10 +125,14 @@ const AllPosts = () => {
     // Apply posted within filter
     if (filters.posted_within) {
       const now = new Date();
-      const jobDate = (date) => new Date(date);
       
       result = result.filter(job => {
-        const timeDiff = now - jobDate(job.created_at);
+        if (!job.created_at) return false;
+        
+        const jobDate = new Date(job.created_at);
+        if (isNaN(jobDate.getTime())) return false;
+        
+        const timeDiff = now - jobDate;
         const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
 
         switch (filters.posted_within) {
@@ -118,7 +151,11 @@ const AllPosts = () => {
     }
 
     // Sort the filtered results by date (most recent first)
-    result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    result.sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
+      const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
+      return dateB - dateA;
+    });
     
     setFilteredJobs(result);
   }, [searchTerm, filters, allJobs]);
@@ -136,8 +173,7 @@ const AllPosts = () => {
       experience_level: '',
       skills: '',
       posted_within: '',
-      jobTitle: '', // Clear job title filter as well
-      // Location:'',
+      jobTitle: '',
     });
     setSearchTerm('');
   };
@@ -147,34 +183,42 @@ const AllPosts = () => {
   };
 
   const formatPostedDate = (dateString) => {
-    const now = new Date();
-    const createdAt = new Date(dateString);
-    const diffInSeconds = Math.floor((now - createdAt) / 1000);
+    if (!dateString) return "Unknown";
+    
+    try {
+      const now = new Date();
+      const createdAt = new Date(dateString);
+      
+      if (isNaN(createdAt.getTime())) {
+        return "Invalid date";
+      }
+      
+      const diffInSeconds = Math.floor((now - createdAt) / 1000);
 
-    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
-    return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+      if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+      return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Unknown";
+    }
   };
 
-  // const handleSearchChange = (e) => {
-  //   setSearchTerm(e.target.value);
-  // };
-
+  // Handle loading state
   if (loading) {
     return <div className="loading-container"><p className="loading-text">Loading jobs...</p></div>;
   }
 
+  // Handle error state
   if (error) {
     return <div className="error-container"><p className="error-text">Error: {error}</p></div>;
   }
 
   return (
-    
     <div className="page-container">
-      
       <div className="content-wrapper">
         <div className="page-header">
           <button className="btn btn-primary" onClick={() => navigate('/candidate-dashboard')}>
@@ -254,7 +298,7 @@ const AllPosts = () => {
                 className="filter-select"
               >
                 <option value="">Any Time</option>
-                <option value="1h">Last 1 hours</option>
+                <option value="1h">Last 1 hour</option>
                 <option value="24h">Last 24 hours</option>
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -271,11 +315,11 @@ const AllPosts = () => {
         )}
 
         <div className="grid-container">
-          {filteredJobs.length > 0 ? (
+          {filteredJobs && filteredJobs.length > 0 ? (
             filteredJobs.map((job) => (
               <div 
-                key={job.id} 
-                className={`card  ${hoveredId === job.id ? 'card-hovered' : ''}`}
+                key={job.id || index} 
+                className={`card ${hoveredId === job.id ? 'card-hovered' : ''}`}
                 onMouseEnter={() => setHoveredId(job.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
@@ -286,34 +330,38 @@ const AllPosts = () => {
                   </div>
 
                   <div className="card-body1">
-                  <Briefcase className="text-gray-600" size={20} />
+                    <Briefcase className="text-gray-600" size={20} />
 
-                    <h3 className="card-title1">{job.title}</h3>
+                    <h3 className="card-title1">{job.title || "Untitled Position"}</h3>
                     
                     <div className="info-section1">
                       <h4 className="section-title1">Description</h4>
-                      <p className="description-text1">{job.description}</p>
+                      <p className="description-text1">{job.description || "No description available"}</p>
                     </div>
 
                     <div className="info-section1">
                       <h4 className="section-title1">Required Skills</h4>
                       <div className="tags-container1">
-                        {job.skills.map((skill, index) => (
-                          <span key={index} className="tag skill-tag">
-                            {skill}
-                          </span>
-                        ))}
+                        {Array.isArray(job.skills) && job.skills.length > 0 ? (
+                          job.skills.map((skill, index) => (
+                            <span key={index} className="tag skill-tag">
+                              {skill}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="no-skills">No specific skills mentioned</span>
+                        )}
                       </div>
                     </div>
 
                     <div className="info-section1">
                       <h4 className="section-title1">Experience Level</h4>
-                      <p className="text">{job.experience_level}</p>
+                      <p className="text">{job.experience_level || "Not specified"}</p>
                     </div>
+                    
                     <div className="info-section1">
                       <h4 className="section-title1">Location</h4>
-                      
-                      <p className="text">{job.location}</p>
+                      <p className="text">{job.location || "Not specified"}</p>
                     </div>
 
                     <button
