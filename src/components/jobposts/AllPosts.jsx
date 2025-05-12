@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft as ArrowLeftIcon, Clock as ClockIcon, Search as SearchIcon, Filter as FilterIcon, Briefcase } from 'lucide-react';
 import '../../styles/JobPosts.css';
 import "../../styles/filter.css";
@@ -7,10 +7,8 @@ import { useUser } from '../context/UserContext';
 const BASE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const AllPosts = () => {
-  // Safely access user context
+  // Don't destructure useUser() result - just use it directly when needed
   const userContext = useUser();
-  const name = userContext?.name;
-  const profileImage = userContext?.profileImage;
   
   const [allJobs, setAllJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
@@ -99,14 +97,15 @@ const AllPosts = () => {
     }
     
     try {
-      let result = [...allJobs];
+      // Work with a clean copy of jobs - filter out any null/undefined entries
+      let result = allJobs.filter(job => job !== null && job !== undefined);
 
       // Apply search filter
       if (searchTerm && searchTerm.trim()) {
         const searchLower = searchTerm.toLowerCase().trim();
         result = result.filter(job => {
-          const title = job?.title || "";
-          const description = job?.description || "";
+          const title = job.title ? job.title : "";
+          const description = job.description ? job.description : "";
           return title.toLowerCase().includes(searchLower) || 
                  description.toLowerCase().includes(searchLower);
         });
@@ -116,7 +115,7 @@ const AllPosts = () => {
       if (filters.jobTitle && filters.jobTitle.trim()) {
         const titleLower = filters.jobTitle.toLowerCase().trim();
         result = result.filter(job => {
-          const title = job?.title || "";
+          const title = job.title ? job.title : "";
           return title.toLowerCase().includes(titleLower);
         });
       }
@@ -124,7 +123,7 @@ const AllPosts = () => {
       // Apply experience level filter
       if (filters.experience_level) {
         result = result.filter(job => {
-          const expLevel = job?.experience_level || "";
+          const expLevel = job.experience_level ? job.experience_level : "";
           return expLevel.toLowerCase() === filters.experience_level.toLowerCase();
         });
       }
@@ -134,7 +133,7 @@ const AllPosts = () => {
         const searchSkills = filters.skills.toLowerCase().split(',').map(skill => skill.trim());
         result = result.filter(job => {
           // Add null check for skills
-          const jobSkills = Array.isArray(job?.skills) 
+          const jobSkills = job.skills && Array.isArray(job.skills) 
             ? job.skills.map(skill => typeof skill === 'string' ? skill.toLowerCase() : '')
             : [];
           
@@ -149,7 +148,7 @@ const AllPosts = () => {
         const now = new Date();
         
         result = result.filter(job => {
-          if (!job?.created_at) return false;
+          if (!job.created_at) return false;
           
           const jobDate = new Date(job.created_at);
           if (isNaN(jobDate.getTime())) return false;
@@ -357,64 +356,69 @@ const AllPosts = () => {
 
         <div className="grid-container">
           {filteredJobs && filteredJobs.length > 0 ? (
-            filteredJobs.map((job, index) => (
-              <div 
-                key={job?.id || `job-${index}`} 
-                className={`card ${hoveredId === job?.id ? 'card-hovered' : ''}`}
-                onMouseEnter={() => setHoveredId(job?.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                <div className="card-content">
-                  <div className="time-badge">
-                    <ClockIcon size={14} />
-                    <span>{formatPostedDate(job?.created_at)}</span>
-                  </div>
-
-                  <div className="card-body1">
-                    <Briefcase className="text-gray-600" size={20} />
-
-                    <h3 className="card-title1">{job?.title || "Untitled Position"}</h3>
-                    
-                    <div className="info-section1">
-                      <h4 className="section-title1">Description</h4>
-                      <p className="description-text1">{job?.description || "No description available"}</p>
+            filteredJobs.map((job, index) => {
+              // Make sure job is not null or undefined before rendering
+              if (!job) return null;
+              
+              return (
+                <div 
+                  key={job.id || `job-${index}`} 
+                  className={`card ${hoveredId === job.id ? 'card-hovered' : ''}`}
+                  onMouseEnter={() => setHoveredId(job.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <div className="card-content">
+                    <div className="time-badge">
+                      <ClockIcon size={14} />
+                      <span>{formatPostedDate(job.created_at)}</span>
                     </div>
 
-                    <div className="info-section1">
-                      <h4 className="section-title1">Required Skills</h4>
-                      <div className="tags-container1">
-                        {job?.skills && Array.isArray(job.skills) && job.skills.length > 0 ? (
-                          job.skills.map((skill, idx) => (
-                            <span key={`${job?.id}-skill-${idx}`} className="tag skill-tag">
-                              {skill}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="no-skills">No specific skills mentioned</span>
-                        )}
+                    <div className="card-body1">
+                      <Briefcase className="text-gray-600" size={20} />
+
+                      <h3 className="card-title1">{job.title || "Untitled Position"}</h3>
+                      
+                      <div className="info-section1">
+                        <h4 className="section-title1">Description</h4>
+                        <p className="description-text1">{job.description || "No description available"}</p>
                       </div>
-                    </div>
 
-                    <div className="info-section1">
-                      <h4 className="section-title1">Experience Level</h4>
-                      <p className="text">{job?.experience_level || "Not specified"}</p>
-                    </div>
-                    
-                    <div className="info-section1">
-                      <h4 className="section-title1">Location</h4>
-                      <p className="text">{job?.location || "Not specified"}</p>
-                    </div>
+                      <div className="info-section1">
+                        <h4 className="section-title1">Required Skills</h4>
+                        <div className="tags-container1">
+                          {job.skills && Array.isArray(job.skills) && job.skills.length > 0 ? (
+                            job.skills.map((skill, idx) => (
+                              <span key={`${job.id}-skill-${idx}`} className="tag skill-tag">
+                                {typeof skill === 'string' ? skill : ''}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="no-skills">No specific skills mentioned</span>
+                          )}
+                        </div>
+                      </div>
 
-                    <button
-                      className={`btn btn-primary compact w-full ${hoveredId === job?.id ? 'btn-hover' : ''}`}
-                      onClick={() => job && handleApplyJob(job)}
-                    >
-                      Apply Now
-                    </button>
+                      <div className="info-section1">
+                        <h4 className="section-title1">Experience Level</h4>
+                        <p className="text">{job.experience_level || "Not specified"}</p>
+                      </div>
+                      
+                      <div className="info-section1">
+                        <h4 className="section-title1">Location</h4>
+                        <p className="text">{job.location || "Not specified"}</p>
+                      </div>
+
+                      <button
+                        className={`btn btn-primary compact w-full ${hoveredId === job.id ? 'btn-hover' : ''}`}
+                        onClick={() => handleApplyJob(job)}
+                      >
+                        Apply Now
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="empty-state">
               <p className="empty-text">No jobs match your search criteria.</p>
