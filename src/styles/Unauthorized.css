@@ -1,0 +1,139 @@
+/* Unauthorized.css */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes slideInFromLeft {
+    0% { transform: translateX(-50px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  
+  .unauthorized-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+    padding: 20px;
+    opacity: 0;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.8s ease forwards;
+  }
+  
+  .unauthorized-card {
+    width: 90%;
+    max-width: 480px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .unauthorized-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #ff4b61, #ff8a5c);
+  }
+  
+  .warning-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    color: #ff4b61;
+    position: relative;
+  }
+  
+  .warning-icon.pulse {
+    animation: pulse 2s infinite;
+  }
+  
+  .error-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #253858;
+    margin-bottom: 20px;
+  }
+  
+  .error-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+    margin: 24px 0;
+  }
+  
+  .error-message {
+    font-size: 1.1rem;
+    color: #5e6c84;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    animation: slideInFromLeft 0.5s ease 0.8s forwards;
+  }
+  
+  .home-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    background: linear-gradient(90deg, #3498db, #2980b9);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  }
+  
+  .home-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(90deg, #2980b9, #3498db);
+  }
+  
+  .button-icon {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .unauthorized-card {
+      padding: 30px 20px;
+    }
+    
+    .error-title {
+      font-size: 1.8rem;
+    }
+    
+    .error-message {
+      font-size: 1rem;
+    }
+    
+    .warning-icon {
+      width: 60px;
+      height: 60px;
+    }
+  }

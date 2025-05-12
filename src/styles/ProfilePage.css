@@ -1,0 +1,711 @@
+/* Main Profile Page Styles */
+.ts-profile-page {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  color: #333;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Profile Header Section */
+.ts-profile-header {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.ts-profile-header:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.ts-profile-avatar-container {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.ts-profile-avatar {
+  width: 95px;
+  height: 95px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.ts-profile-avatar:hover {
+  transform: scale(1.03);
+}
+
+.ts-profile-upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+/* 
+.ts-profile-avatar-container:hover .ts-profile-upload-overlay {
+  opacity: 1;
+} */
+
+.ts-file-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.ts-upload-photo-btn {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4F46E5;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.ts-profile-avatar-container:hover .ts-upload-photo-btn {
+  opacity: 1;
+  bottom: 0;
+}
+
+.ts-upload-btn {
+  cursor: pointer;
+}
+
+.ts-profile-header-info {
+  flex: 1;
+  min-width: 250px;
+}
+
+.ts-profile-name1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ecedf0;
+}
+
+.ts-profile-headline {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  color: #ecedf0;
+  font-weight: 500;
+}
+
+.ts-profile-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.95rem;
+  color: #ecedf0;
+}
+
+.ts-icon-small {
+  color: #ecedf0;
+}
+
+.ts-edit-profile-btn {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: 1px solid #5246a1;
+  color: #4B5563;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #d6d2d6;
+}
+
+.ts-edit-profile-btn:hover {
+  background-color: #F9FAFB;
+  border-color: #D1D5DB;
+  color: #1F2937;
+}
+
+/* Profile Content Layout */
+.ts-profile-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .ts-profile-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .ts-profile-header {
+    padding: 1.5rem;
+  }
+  
+  .ts-edit-profile-btn {
+    top: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .ts-profile-avatar-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .ts-profile-header-info {
+    text-align: center;
+  }
+  
+  .ts-profile-location {
+    justify-content: center;
+  }
+}
+
+/* Profile Sections */
+.ts-profile-section {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.ts-profile-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ts-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1E293B;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.ts-profile-bio {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4B5563;
+  margin: 0;
+}
+
+/* Form Styling */
+.ts-profile-edit-form {
+  width: 100%;
+}
+
+.ts-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.ts-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4B5563;
+}
+
+.ts-form-input,
+.ts-form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #1F2937;
+  background-color: #FFF;
+  transition: all 0.2s ease;
+}
+
+.ts-form-input:focus,
+.ts-form-textarea:focus {
+  outline: none;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.ts-form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.ts-form-input-file {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #F9FAFB;
+  border: 1px dashed #D1D5DB;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.ts-form-input-file:hover {
+  border-color: #9CA3AF;
+}
+
+.ts-form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.ts-save-profile-btn,
+.ts-cancel-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ts-save-profile-btn {
+  background-color: #4F46E5;
+  color: white;
+  border: none;
+}
+
+.ts-save-profile-btn:hover {
+  background-color: #4338CA;
+}
+
+.ts-cancel-btn {
+  background-color: white;
+  color: #4B5563;
+  border: 1px solid #E5E7EB;
+}
+
+.ts-cancel-btn:hover {
+  background-color: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* Skills Section */
+.ts-skills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ts-skill-tag {
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ts-skill-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.2);
+}
+
+/* Info Grids and Cards */
+.ts-info-grid,
+.ts-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.ts-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ts-info-icon {
+  color: #6B7280;
+  margin-top: 0.25rem;
+}
+
+.ts-info-label {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin: 0 0 0.25rem 0;
+  font-weight: 500;
+}
+
+.ts-info-value {
+  font-size: 1rem;
+  color: #1F2937;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Stats Cards */
+.ts-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.ts-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #F9FAFB;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.ts-stat-card:hover {
+  background-color: #F3F4F6;
+  transform: translateY(-2px);
+}
+
+.ts-stat-icon {
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-stat-info {
+  flex: 1;
+}
+
+.ts-stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1E293B;
+  margin: 0 0 0.25rem 0;
+}
+
+.ts-stat-label {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Contact Section */
+.ts-contact-section {
+  background-color: #FFF;
+}
+
+.ts-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ts-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ts-contact-icon {
+  color: #6B7280;
+}
+
+.ts-contact-item p {
+  margin: 0;
+  color: #4B5563;
+}
+
+/* Resume Section */
+.ts-resume-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #F9FAFB;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.ts-resume-icon {
+  color: #4F46E5;
+}
+
+.ts-resume-info {
+  flex: 1;
+}
+
+.ts-resume-title {
+  font-weight: 500;
+  margin: 0 0 0.25rem 0;
+  color: #1F2937;
+}
+
+.ts-resume-date {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin: 0;
+}
+
+.ts-update-resume-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #FFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  color: #4B5563;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ts-update-resume-btn:hover {
+  background-color: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* Social Links */
+.ts-social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: #F9FAFB;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #4B5563;
+  transition: all 0.2s ease;
+}
+
+.ts-social-link:hover {
+  background-color: #F3F4F6;
+  transform: translateY(-2px);
+}
+
+.ts-social-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.ts-social-icon.linkedin {
+  background-color: #0077B5;
+  color: white;
+}
+
+.ts-social-icon.github {
+  background-color: #24292E;
+  color: white;
+}
+
+.ts-social-icon.portfolio {
+  background-color: #4F46E5;
+  color: white;
+}
+
+.ts-social-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Quick Actions */
+.ts-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ts-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ts-post-job-btn {
+  background-color: #4F46E5;
+  color: white;
+  border: none;
+}
+
+.ts-post-job-btn:hover {
+  background-color: #4338CA;
+}
+
+.ts-view-applicants-btn {
+  background-color: white;
+  color: #4B5563;
+  border: 1px solid #E5E7EB;
+}
+
+.ts-view-applicants-btn:hover {
+  background-color: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 992px) {
+  .ts-info-grid,
+  .ts-links-grid,
+  .ts-stats-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .ts-profile-page {
+    padding: 0 1rem;
+    margin: 1rem auto;
+  }
+  
+  .ts-profile-header {
+    padding: 1.25rem;
+  }
+  
+  .ts-profile-avatar {
+    width: 96px;
+    height: 96px;
+  }
+  
+  .ts-profile-upload-overlay {
+    width: 96px;
+    height: 96px;
+  }
+  
+  .ts-profile-name1 {
+    font-size: 1.5rem;
+  }
+  
+  .ts-profile-headline {
+    font-size: 1rem;
+  }
+  
+  .ts-profile-section {
+    padding: 1.25rem;
+  }
+  
+  .ts-section-title {
+    font-size: 1.125rem;
+  }
+  
+  .ts-form-actions {
+    flex-direction: column;
+  }
+  
+  .ts-save-profile-btn,
+  .ts-cancel-btn {
+    width: 100%;
+  }
+  
+  .ts-info-grid,
+  .ts-links-grid,
+  .ts-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Additional Animations and Effects */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ts-profile-section {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.ts-profile-section:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.ts-profile-section:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.ts-profile-section:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.ts-profile-section:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
