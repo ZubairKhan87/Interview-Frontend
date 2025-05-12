@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import axiosInstance from '../api/axiosConfig';
 import { useUser } from "../context/UserContext";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 import { 
   BriefcaseIcon, PlayIcon, NewspaperIcon, 
@@ -64,7 +65,7 @@ const CandidateDashboard = () => {
         const accessToken = localStorage.getItem('access');
         
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/job_posting/publicposts/', {
+          const response = await fetch(`${BASE_API_URL}/api/job_posting/publicposts/`, {
             headers: {
               'Authorization': `Bearer ${accessToken}`
             }
@@ -194,7 +195,7 @@ const CandidateDashboard = () => {
                 return;
             }
 
-            const response = await axios.get('http://localhost:8000/api/authentication/profile/image/', {
+            const response = await axios.get(`${BASE_API_URL}/api/authentication/profile/image/`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -236,7 +237,7 @@ const handleImageChange = async (event) => {
     const accessToken = localStorage.getItem('access');
     
     const response = await axios.post(
-      'http://localhost:8000/api/authentication/profile/image/upload/',
+      `${BASE_API_URL}/api/authentication/profile/image/upload/`,
       formData,
       {
         headers: {

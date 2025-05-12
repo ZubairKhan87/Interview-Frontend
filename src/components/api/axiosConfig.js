@@ -1,8 +1,9 @@
 // Create a file like axiosConfig.js
 import axios from 'axios';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL:  `${BASE_API_URL}/api`,
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
@@ -37,7 +38,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem('refresh');
-        const response = await axios.post('http://127.0.0.1:8000/api/authentication/token/refresh/', {
+        const response = await axios.post(`${BASE_API_URL}/api/authentication/token/refresh/`, {
           refresh: refreshToken
         });
 

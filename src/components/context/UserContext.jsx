@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import {useNavigate } from 'react-router-dom';
 const UserContext = createContext();
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 export const UserProvider = ({ children }) => {
   const [username, setUsername] = useState(localStorage.getItem("username") || "Guest");
@@ -22,10 +23,10 @@ export const UserProvider = ({ children }) => {
       console.log("Before profile fetch - userType:", currentUserType);
       let endpoint=""
       if (currentUserType==='candidate'){
-        endpoint="http://localhost:8000/api/authentication/profile/candidate/image/"
+        endpoint=`${BASE_API_URL}/api/authentication/profile/candidate/image/`
       }
       else  if (currentUserType==='recruiter'){
-        endpoint="http://localhost:8000/api/authentication/profile/recruiter/image/"
+        endpoint=`${BASE_API_URL}/api/authentication/profile/recruiter/image/`
       }
       const response = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${accessToken}` },

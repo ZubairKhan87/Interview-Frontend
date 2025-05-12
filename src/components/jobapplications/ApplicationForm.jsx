@@ -5,6 +5,7 @@ import { faUser, faEnvelope, faGraduationCap, faFileUpload, faFilePdf } from "@f
 import { useLocation, useNavigate } from 'react-router-dom';
 import CustomAlert from '../alerts/CustomAlert';
 import { useUser } from "../context/UserContext";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 function ApplicationForm() {
   const { name, profileImage } = useUser();
@@ -38,7 +39,7 @@ function ApplicationForm() {
       setIsLoading(true);
       try {
         const accessToken = localStorage.getItem("access");
-        const response = await fetch("http://localhost:8000/api/job_posting/current-candidate/profile/", {
+        const response = await fetch(`${BASE_API_URL}/api/job_posting/current-candidate/profile/`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -171,7 +172,7 @@ function ApplicationForm() {
         });
       });
       
-      xhr.open('POST', 'http://localhost:8000/api/job_posting/apply/', true);
+      xhr.open('POST', `${BASE_API_URL}/api/job_posting/apply/`, true);
       xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
       xhr.send(form);
       

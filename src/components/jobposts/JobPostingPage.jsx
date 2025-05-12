@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CustomAlert from '../alerts/CustomAlert';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const JobPostingPage = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -50,7 +51,7 @@ const JobPostingPage = () => {
     
     try {
       const accessToken = localStorage.getItem('access');
-      await axios.post('http://127.0.0.1:8000/api/job_posting/job_posting/', jobData, {
+      await axios.post(`${BASE_API_URL}/api/job_posting/job_posting/`, jobData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,

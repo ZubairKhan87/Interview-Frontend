@@ -11,6 +11,7 @@ import { Button, Tooltip, message, Spin } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { color } from 'framer-motion';
 // import { Button, Tooltip, message, Spin } from 'antd';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const ApplicantProfilePage = () => {
   const location = useLocation();

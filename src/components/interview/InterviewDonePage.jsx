@@ -80,7 +80,7 @@ const CandidateInterviewPage = () => {
           >
             <ArrowLeft size={16} /> Back
           </button>
-          <h2 className="page-title">Your Applied Jobs</h2>
+          <h2 className="page-title">Completed Interviews</h2>
         </div>
 
         <div className="grid-container">

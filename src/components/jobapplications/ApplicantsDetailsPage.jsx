@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Clock, Search } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import "../../styles/ApplicantsDetailPage.css";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const ApplicantsDetailsPage = () => {
   const location = useLocation();

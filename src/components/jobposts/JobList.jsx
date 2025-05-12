@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const JobList = () => {
     const [jobs, setJobs] = useState([]);
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/api/job_posting/jobs/")
+        axios.get(`${BASE_API_URL}/api/job_posting/jobs/`)
             .then(response => setJobs(response.data))
             .catch(error => console.error("Error fetching job data:", error));
     }, []);
@@ -18,7 +19,7 @@ const JobList = () => {
                     <div key={job.id} style={styles.jobPost}>
                         <h2 style={styles.jobTitle}>{job.title}</h2>
                         <img 
-                            src={`http://127.0.0.1:8000${job.image}`} 
+                            src={`${BASE_API_URL}${job.image}`} 
                             alt={job.title}
                             style={{ width: '10px' }}
                         />

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import '../../styles/FaceVerification.css';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const FaceVerification = () => {
   const [stream, setStream] = useState(null);

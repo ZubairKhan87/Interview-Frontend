@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import "../../styles/ProfilePage.css"; //  a CSS file for styles
 import axiosInstance from "../api/axiosConfig";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const ProfilePage = () => {
   // Get userType from UserContext
@@ -57,16 +58,16 @@ const ProfilePage = () => {
 
         // Decide which endpoint to use based on user type
         let endpoint =
-          "http://localhost:8000/api/authentication/profile/image/";
+          `${BASE_API_URL}/api/authentication/profile/image/`;
 
         if (currentUserType === "candidate") {
           // Candidate-specific endpoint if needed
           endpoint =
-            "http://localhost:8000/api/authentication/profile/candidate/image/";
+            `${BASE_API_URL}/api/authentication/profile/candidate/image/`;
         } else if (currentUserType === "recruiter") {
           // Recruiter-specific endpoint if needed
           endpoint =
-            "http://localhost:8000/api/authentication/profile/recruiter/image/";
+            `${BASE_API_URL}api/authentication/profile/recruiter/image/`;
         }
 
         const response = await axios.get(endpoint, {
@@ -96,9 +97,9 @@ const ProfilePage = () => {
     const currentUserType = userType || localStorage.getItem("userType");
     let endpoint = "";
     if (currentUserType === "candidate") {
-      endpoint = "http://localhost:8000/api/authentication/candidate/profile/";
+      endpoint = `${BASE_API_URL}/api/authentication/candidate/profile/`;
     } else if (currentUserType === "recruiter") {
-      endpoint = "http://localhost:8000/api/authentication/recruiter/profile/";
+      endpoint = `${BASE_API_URL}/api/authentication/recruiter/profile/`;
     }
     try {
       const accessToken = localStorage.getItem("access"); // Changed to 'access' to match  other code
@@ -132,9 +133,9 @@ const ProfilePage = () => {
     const currentUserType = userType || localStorage.getItem("userType");
     let endpoint = "";
     if (currentUserType === "candidate") {
-      endpoint = "http://localhost:8000/api/authentication/candidate/profile/";
+      endpoint = `${BASE_API_URL}/api/authentication/candidate/profile/`;
     } else if (currentUserType === "recruiter") {
-      endpoint = "http://localhost:8000/api/authentication/recruiter/profile/";
+      endpoint = `${BASE_API_URL}/api/authentication/recruiter/profile/`;
     }
     try {
       const accessToken = localStorage.getItem("access");
@@ -174,7 +175,7 @@ const ProfilePage = () => {
       formData.append("resume", resumeFile);
 
       const response = await axios.post(
-        "http://localhost:8000/api/authentication/candidate/resume/",
+        `${BASE_API_URL}/api/authentication/candidate/resume/`,
         formData,
         {
           headers: {
@@ -310,14 +311,14 @@ const ProfilePage = () => {
       const accessToken = localStorage.getItem("access");
       const currentUserType = userType || localStorage.getItem("userType");
       let endpoint =
-        "http://localhost:8000/api/authentication/profile/image/candidate/upload/";
+        `${BASE_API_URL}/api/authentication/profile/image/candidate/upload/`;
 
       if (currentUserType === "candidate") {
         endpoint =
-          "http://localhost:8000/api/authentication/profile/image/candidate/upload/";
+          `${BASE_API_URL}/api/authentication/profile/image/candidate/upload/`;
       } else if (currentUserType === "recruiter") {
         endpoint =
-          "http://localhost:8000/api/authentication/profile/image/recruiter/upload/";
+          `${BASE_API_URL}/api/authentication/profile/image/recruiter/upload/`;
       }
       const response = await axios.post(endpoint, formData, {
         headers: {

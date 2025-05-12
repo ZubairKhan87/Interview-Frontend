@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Briefcase } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import InterviewAlert from '../alerts/InterviewAlert';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const CandidateAppliedJobs = () => {
   const [jobs, setJobs] = useState([]);

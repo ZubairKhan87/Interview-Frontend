@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Briefcase } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const IncompleteInterviewPage = () => {
   const [incompleteInterview, setIncompleteInterview] = useState([]);

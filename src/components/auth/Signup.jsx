@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import "../../styles/Login.css"; // Assuming Login.css also styles Signup
 import { useUser } from "../context/UserContext";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
+
 const Signup = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -36,7 +38,7 @@ const Signup = () => {
     }
 
     try {
-      await axios.post("http://localhost:8000/api/authentication/register/", {
+      await axios.post(`${BASE_API_URL}/api/authentication/register/`, {
         username,
         email,
         password,

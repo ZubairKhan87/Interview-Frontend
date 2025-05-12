@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const Logout = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Logout = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:8000/api/authentication/logout/", {
+      const response = await fetch(`${BASE_API_URL}/api/authentication/logout/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

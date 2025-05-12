@@ -4,6 +4,7 @@ import axios from "axios";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import '../../styles/Login.css'
 import { useUser } from "../context/UserContext";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -30,7 +31,7 @@ const Login = () => {
   
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/authentication/candidate/",
+        `${BASE_API_URL}/api/authentication/candidate/`,
         {
           username,
           password,
@@ -65,7 +66,7 @@ const Login = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
         const response = await axios.post(
-            "http://localhost:8000/api/authentication/google/auth/",
+            `${BASE_API_URL}/api/authentication/google/auth/`,
             {
                 token: credentialResponse.credential,
             }

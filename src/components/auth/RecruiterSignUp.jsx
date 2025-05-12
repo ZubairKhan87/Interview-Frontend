@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Login.css";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -36,7 +37,7 @@ const Signup = () => {
 
     try {
       // Send registration request to your Django backend
-      await axios.post("http://localhost:8000/api/authentication/recruiter-request/", {
+      await axios.post(`${BASE_API_URL}/api/authentication/recruiter-request/`, {
         username,
         email,
         organization,

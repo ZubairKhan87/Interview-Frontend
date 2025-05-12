@@ -4,6 +4,8 @@ import { ArrowLeft as ArrowLeftIcon, Clock as ClockIcon, Search as SearchIcon, F
 import '../../styles/JobPosts.css';
 import "../../styles/filter.css"; // Assuming AllPosts uses filter.css
 import { useUser } from '../context/UserContext';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
+
 const AllPosts = () => {
   const { name, profileImage } = useUser();
   
@@ -28,7 +30,7 @@ const AllPosts = () => {
       const accessToken = localStorage.getItem('access');
       
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/job_posting/publicposts/', {
+        const response = await fetch(`${BASE_API_URL}/api/job_posting/publicposts/`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }

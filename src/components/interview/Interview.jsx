@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import logo from '../../assets/logo.png';
 import "../../styles/Interview.css"; // Assuming Chatbot.css styles Interview
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 // Placeholder logo component
 const CompanyLogo = () => (
@@ -77,7 +78,7 @@ const InterviewTimer = ({ duration = 300 }) => {
 // Create axios instance with default config
 // Create a separate axios instance for frame uploads
 const frameApi = axios.create({
-    baseURL: 'http://localhost:8000',
+    baseURL: `${BASE_API_URL}`,
     withCredentials: true
 });
 
@@ -331,7 +332,7 @@ const Chat = () => {
                 
                 // Attempt to end interview
                 try {
-                    axios.post('http://localhost:8000/api/chat/chat/', {
+                    axios.post(`${BASE_API_URL}/api/chat/chat/`, {
                         // message: 'Interview forcefully terminated',
                         // intent: 'Quit_interview',
                         job_id: jobId,
@@ -375,7 +376,7 @@ const Chat = () => {
     // Modify existing navigation methods to include additional checks
     const handleInterviewTermination = useCallback(async (reason = 'Interview terminated') => {
         try {
-            await axios.post('http://localhost:8000/api/chat/chat/', {
+            await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
                 // message: reason,
                 // intent: 'Quit_interview',
                 job_id: jobId,
@@ -480,7 +481,7 @@ const animateText = (text) => {
 // Reset interview function with proper error handling
 const resetInterview = useCallback(async () => {
     try {
-        const response = await axios.post('http://localhost:8000/api/chat/chat/', {
+        const response = await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
             reset: true,
             job_id: jobId,
             candidate_id: candidateId,
@@ -703,7 +704,7 @@ const stopRecordingAndSend = async () => {
                 setCurrentAnswer(transcribedText);
                 console.log('Transcribed text:', transcribedText);
                 // Send the transcribed text for processing
-                const chatResponse = await axios.post('http://localhost:8000/api/chat/chat/', {
+                const chatResponse = await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
                     message: transcribedText,
                     job_id: jobId,
                     candidate_id: candidateId,

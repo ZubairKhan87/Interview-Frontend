@@ -40,6 +40,8 @@ import { FaBroadcastTower, FaRegClipboard, FaMicrophoneAlt, FaBrain } from 'reac
 import values1 from '../../assets/img/values-1.png';
 import values2 from '../../assets/img/values-2.png';
 import values3 from '../../assets/img/values-3.png';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
+
 const LandingPage = () => {
   const [activeIndex, setActiveIndex] = useState(null);
    // State for mobile menu

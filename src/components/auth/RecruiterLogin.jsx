@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../styles/Login.css";
 import { useUser } from "../context/UserContext";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const RecruiterLogin = () => {
   const [username, setUsername] = useState("");
@@ -29,7 +30,7 @@ const RecruiterLogin = () => {
   
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/authentication/recruiter/",
+        `${BASE_API_URL}/api/authentication/recruiter/`,
         {
           username,
           password,

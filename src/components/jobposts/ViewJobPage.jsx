@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import CustomDialog from '../alerts/CustomDialog';
 import '../../styles/JobPosts.css';
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const AllJobsPage = () => {
 
