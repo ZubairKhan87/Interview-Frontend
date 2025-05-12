@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft as ArrowLeftIcon, Clock as ClockIcon, Search as SearchIcon, Filter as FilterIcon, Briefcase } from 'lucide-react';
 import '../../styles/JobPosts.css';
 import "../../styles/filter.css";
@@ -7,8 +7,10 @@ import { useUser } from '../context/UserContext';
 const BASE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const AllPosts = () => {
-  // Remove unused destructured values if they're causing errors
-  const { name, profileImage } = useUser() || {};
+  // Safely access user context
+  const userContext = useUser();
+  const name = userContext?.name;
+  const profileImage = userContext?.profileImage;
   
   const [allJobs, setAllJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
@@ -81,7 +83,7 @@ const AllPosts = () => {
     };
 
     fetchJobs();
-  }, [BASE_API_URL]);
+  }, []);
 
   // Apply filters
   useEffect(() => {
@@ -381,7 +383,7 @@ const AllPosts = () => {
                     <div className="info-section1">
                       <h4 className="section-title1">Required Skills</h4>
                       <div className="tags-container1">
-                        {Array.isArray(job?.skills) && job.skills.length > 0 ? (
+                        {job?.skills && Array.isArray(job.skills) && job.skills.length > 0 ? (
                           job.skills.map((skill, idx) => (
                             <span key={`${job?.id}-skill-${idx}`} className="tag skill-tag">
                               {skill}
