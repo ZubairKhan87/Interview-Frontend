@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Briefcase } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 const BASE_API_URL = import.meta.env.VITE_API_URL;
+import '../../styles/JobPosts.css';
 
 const IncompleteInterviewPage = () => {
   const [incompleteInterview, setIncompleteInterview] = useState([]);
@@ -120,7 +121,7 @@ const IncompleteInterviewPage = () => {
           >
             <ArrowLeft size={16} /> Back
           </button>
-          <h2 className="page-title">Your Applied Jobs</h2>
+          <h2 className="page-title">Incompleted Interviews</h2>
         </div>
 
         <div className="grid-container">

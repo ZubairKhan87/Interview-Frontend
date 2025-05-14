@@ -99,8 +99,8 @@ const CandidateAppliedJobs = () => {
         jobId: selectedJob.id,
         candidateId: candidateId
       });
-      
-      navigate('/face-verification', {
+      console.log("Navigating to chat with jobId:", selectedJob.id, "and candidateId:", candidateId);
+      navigate('/chat', {
         state: {
           jobId: selectedJob.id,
           candidateId: candidateId,
