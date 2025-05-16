@@ -402,13 +402,13 @@ const ProfilePage = () => {
       <div className="ts-profile-avatar-wrapper">
         <div className="ts-profile-avatar-container">
           <img
-            src={seperateProfile?.profile_image || "/api/placeholder/128/128"}
+            src={profile?.profile_image || "/api/placeholder/128/128"}
             alt="Profile"
             className="ts-profile-avatar"
           />
           {(
     userType === "recruiter" ||
-    (userType === "candidate" && !seperateProfile?.profile_image)
+    (userType === "candidate" && !profile?.profile_image)
   ) && (
             <div className="ts-profile-upload-overlay">
               <input
