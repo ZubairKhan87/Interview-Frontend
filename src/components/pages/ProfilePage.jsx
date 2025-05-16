@@ -406,8 +406,10 @@ const ProfilePage = () => {
             alt="Profile"
             className="ts-profile-avatar"
           />
-          {(!displayData?.profile_image && userType === "candidate") ||
-          userType === "recruiter" ? (
+          {(
+    userType === "recruiter" ||
+    (userType === "candidate" && !seperateProfile?.profile_image)
+  ) && (
             <div className="ts-profile-upload-overlay">
               <input
                 type="file"
@@ -417,13 +419,13 @@ const ProfilePage = () => {
                 className="ts-file-input"
               />
             </div>
-          ) : null}
+          )}
           <button className="ts-upload-photo-btn">
-            <UploadCloud size={16} />
-            <label htmlFor="profile-image-upload" className="ts-upload-btn">
-              {isUploading ? "Uploading..." : "Upload Photo"}
-            </label>
-          </button>
+        <UploadCloud size={16} />
+        <label htmlFor="profile-image-upload" className="ts-upload-btn">
+          {isUploading ? "Uploading..." : "Upload Photo"}
+        </label>
+      </button>
         </div>
       </div>
 
