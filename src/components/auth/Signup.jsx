@@ -46,7 +46,7 @@ const Signup = () => {
       });
 
       const loginResponse = await axios.post(
-        "http://localhost:8000/api/authentication/candidate/",
+        `${BASE_API_URL}/api/authentication/candidate/`,
         {
           username,
           password,
