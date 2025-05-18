@@ -10,7 +10,7 @@ const JobDetailsPage = () => {
     return <div style={styles.container}>
       <p style={styles.errorText}>Job details not found.</p>
       <button style={styles.backButton} onClick={() => navigate('/applied-jobs')}>
-        Back to Applied Jobs
+        Back to Applied Jobs →
       </button>
     </div>;
   }

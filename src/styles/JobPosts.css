@@ -43,11 +43,28 @@
 }
 
 .page-title {
-    font-size: 1.875rem;
+    font-size: 1.875rem; /* default ~30px */
     font-weight: 600;
     color: var(--gray-900);
-    margin: 0;
+    margin-right: 35vw; /* responsive margin */
 }
+
+/* Adjust for tablets */
+@media (max-width: 1024px) {
+    .page-title {
+        font-size: 1.5rem;
+        margin-right: 5vw;
+    }
+}
+
+/* Adjust for mobile */
+@media (max-width: 640px) {
+    .page-title {
+        font-size: 1.25rem;
+        margin-right: 2vw;
+    }
+}
+
 
 
 /* Grid layout */

@@ -1,152 +1,177 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate,Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet'; // Make sure to install react-helmet
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Helmet } from "react-helmet"; // Make sure to install react-helmet
 import { useUser } from "../context/UserContext";
 
-import { 
-  Search, 
-  Plus, 
-  Briefcase, 
-  Users, 
-  Star, 
-  ChevronRight, 
+import {
+  Search,
+  Plus,
+  Briefcase,
+  Users,
+  Star,
+  ChevronRight,
   Bell,
   LogOut,
   ChevronDown,
-  Building
-} from 'lucide-react';
-import axiosInstance from '../api/axiosConfig';
-import zubair from '../../assets/zubair.jpg';
+  Building,
+  CheckCircleIcon,
+  RefreshCcwIcon
+} from "lucide-react";
+import axiosInstance from "../api/axiosConfig";
+import zubair from "../../assets/zubair.jpg";
 import "../../styles/RecruiterDashboard.css";
 
 const RecruiterDashboard = () => {
   const navigate = useNavigate();
   const [jobPosts, setJobPosts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [notificationCount, setNotificationCount] = useState(3);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [totalCompletedInterviews, setTotalCompletedInterviews] = useState(0);
+  const [totalReInterviewsRequest, setTotalReInterviewsRequest] = useState(0);
   const [dashboardStats, setDashboardStats] = useState({
     totalApplications: 0,
-    interviewsScheduled: 12,
-    averageScore: 82,
-    activeJobs: 0
+    activeJobs: 0,
   });
-  const [username, setUsername] = useState(localStorage.getItem('username') || 'Guest');
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || "Guest"
+  );
   // const { userType } = useUser();
-  
+
   useEffect(() => {
-    const accessToken = localStorage.getItem('access');
+    const accessToken = localStorage.getItem("access");
     if (!accessToken) {
-      navigate('/recruiter-dashboard');
+      navigate("/recruiter-dashboard");
       return;
     }
 
-    axiosInstance.get('job_posting/with_applicants/')
-      .then(response => {
-        const processedPosts = response.data.map(post => ({
-          ...post,
-          skills: Array.isArray(post.skills) ? post.skills.join(', ') : post.skills || ''
-        }))
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Add this line
+    axiosInstance
+      .get("job_posting/with_applicants/")
+      .then((response) => {
+        const processedPosts = response.data
+          .map((post) => ({
+            ...post,
+            skills: Array.isArray(post.skills)
+              ? post.skills.join(", ")
+              : post.skills || "",
+          }))
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Add this line
 
         const totalApps = processedPosts.reduce((total, post) => {
           return total + (post.applicants?.length || 0);
         }, 0);
         setJobPosts(processedPosts);
-        setDashboardStats(prev => ({
+        setDashboardStats((prev) => ({
           ...prev,
           activeJobs: processedPosts.length,
-          totalApplications: totalApps
+          totalApplications: totalApps,
         }));
-      
       })
-      .catch(error => {
-        console.error('Error fetching job posts:', error);
+      .catch((error) => {
+        console.error("Error fetching job posts:", error);
         if (error.response && error.response.status === 401) {
-          localStorage.removeItem('access');
-          localStorage.removeItem('refresh');
-          navigate('/login');
+          localStorage.removeItem("access");
+          localStorage.removeItem("refresh");
+          navigate("/login");
+        }
+      });
+  }, [navigate]);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access");
+    if (!accessToken) {
+      navigate("/recruiter-dashboard");
+      return;
+    }
+    console.log("Fetching completed interviews...");
+    axiosInstance
+      .get("job_posting/recruiter/completed/")
+      .then((response) => {
+        const completedInterviews = response.data;
+        console.log("Completed interviews:", completedInterviews);
+        const totalCompletedInterviews = completedInterviews.reduce((total, post) => {
+          return total + (post.applicants);
+        }, 0);
+        setTotalCompletedInterviews(totalCompletedInterviews); // Set total count here
+      })
+      
+      .catch((error) => {
+        console.error("Error fetching job posts:", error);
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("access");
+          localStorage.removeItem("refresh");
+          navigate("/login");
+        }
+      });
+  }, [navigate]);
+
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access");
+    if (!accessToken) {
+      navigate("/recruiter-dashboard");
+      return;
+    }
+    console.log("Fetching request interviews...");
+    axiosInstance
+      .get("job_posting/recruiter/reinterview/")
+      .then((response) => {
+        const reInterviews = response.data;
+        console.log("Re interviews:", reInterviews);
+        const requestReInterviews = reInterviews.reduce((total, post) => {
+          return total + (post.applicants);
+        }, 0);
+        setTotalReInterviewsRequest(requestReInterviews); // Set total count here
+      })
+      
+      .catch((error) => {
+        console.error("Error fetching reinterviews posts:", error);
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("access");
+          localStorage.removeItem("refresh");
+          navigate("/login");
         }
       });
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('username');
-    localStorage.removeItem('access');
-    localStorage.removeItem('refresh');
-    navigate('/');
+    localStorage.removeItem("username");
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    navigate("/");
   };
 
-  const handleIconClick = () => navigate('/JobPosting');
-  const handleIconPostClick = () => navigate('/view-job');
+  console.log("iterbiew:", totalCompletedInterviews);
+  const handleIconClick = () => navigate("/JobPosting");
+  const handleIconPostClick = () => navigate("/view-job");
 
   const getSkillsArray = (skillsString) => {
     if (!skillsString) return [];
-    return skillsString.split(',').map(skill => skill.trim()).filter(Boolean);
+    return skillsString
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter(Boolean);
   };
 
   return (
     <div className="recruiter-dashboard">
-       <Helmet>
+      <Helmet>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Helmet>
-     
-
-      
-      {/* <nav className="recruiter-dashboard__navbar">
-        <div className="recruiter-dashboard__navbar-content">
-          <div className="recruiter-dashboard__navbar-left">
-            <div className="recruiter-dashboard__logo-container">
-              <Briefcase className="recruiter-dashboard__logo-icon" />
-              <span className="recruiter-dashboard__logo-text">TalentScout</span>
-            </div>
-            <h1>Welcome, Recruiter</h1>
-          </div>
-          
-          <div className="recruiter-dashboard__navbar-right">
-            
-            <div className="recruiter-dashboard__notification-badge">
-              <Bell className="recruiter-dashboard__notification-icon" />
-              {notificationCount > 0 && (
-                <span className="recruiter-dashboard__badge">{notificationCount}</span>
-              )}
-            </div>
-            
-            <div className="recruiter-dashboard__profile-container" onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
-              <img
-                src=""
-                alt="Profile"
-                className="recruiter-dashboard__profile-image"
-              />
-              <span className="recruiter-dashboard__profile-name">{username}</span>
-              <ChevronDown className="recruiter-dashboard__dropdown-icon" />
-              
-              {showProfileDropdown && (
-                <div className="recruiter-dashboard__profile-dropdown">
-                  <button onClick={handleLogout} className="recruiter-dashboard__logout-button">
-                    <LogOut className="recruiter-dashboard__logout-icon" />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav> */}
 
       <div className="recruiter-dashboard__container">
-      <div className="welcome-text">
-      <h1>Welcome, {username}</h1>
-    </div>
+        <div className="welcome-text">
+          <h1>Welcome, {username}</h1>
+        </div>
 
-      <style>
-        {`
+        <style>
+          {`
           .welcome-text {
             text-align: center;
             color:rgb(40, 99, 237);
           }
         `}
-      </style>
+        </style>
         <main className="recruiter-dashboard__main-content">
           <div className="recruiter-dashboard__stats-grid recruiter-dashboard__fade-in">
             <div className="recruiter-dashboard__stat-card">
@@ -155,35 +180,40 @@ const RecruiterDashboard = () => {
                   <Users className="recruiter-dashboard__stat-icon" />
                 </div>
                 <div>
-                  <p className="recruiter-dashboard__stat-label">Total Applications</p>
-                  <p className="recruiter-dashboard__stat-value">{dashboardStats.totalApplications}</p>
-
+                  <p className="ts-card-label">
+                    Total Applications
+                  </p>
+                  <p className="ts-card-value">
+                    {dashboardStats.totalApplications}
+                  </p>
                 </div>
               </div>
             </div>
-            
+
             <div className="recruiter-dashboard__stat-card">
               <div className="recruiter-dashboard__stat-content">
                 <div className="recruiter-dashboard__icon-container recruiter-dashboard__icon-green">
-                  <Briefcase className="recruiter-dashboard__stat-icon" />
+                  <CheckCircleIcon className="recruiter-dashboard__stat-icon" />
                 </div>
                 <div>
-                {/* <Link to="/view-job"> */}
-                  <p className="recruiter-dashboard__stat-label">Interviews Scheduled</p>
-                  <p className="recruiter-dashboard__stat-value">{dashboardStats.activeJobs}</p>
-                {/* </Link> */}
+                  {/* <Link to="/view-job"> */}
+                  <p className="ts-card-label">Completed Interviews</p>
+                  <p className="ts-card-value">
+                    {totalCompletedInterviews}
+                  </p>
+                  {/* </Link> */}
                 </div>
               </div>
             </div>
-            
+
             <div className="recruiter-dashboard__stat-card">
               <div className="recruiter-dashboard__stat-content">
                 <div className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple">
-                  <Star className="recruiter-dashboard__stat-icon" />
+                  <RefreshCcwIcon className="recruiter-dashboard__stat-icon" />
                 </div>
                 <div>
-                  <p className="recruiter-dashboard__stat-label">Average Interview Score</p>
-                  <p className="recruiter-dashboard__stat-value">{dashboardStats.averageScore}%</p>
+                  <p className="ts-card-label">Re-interview Requests</p>
+                  <p className="ts-card-value">{totalReInterviewsRequest}</p>
                 </div>
               </div>
             </div>
@@ -194,21 +224,32 @@ const RecruiterDashboard = () => {
                   <Briefcase className="recruiter-dashboard__stat-icon" />
                 </div>
                 <div>
-                {/* <Link to="/view-job"> */}
-                  <p className="recruiter-dashboard__stat-label">Active Job Posts</p>
-                  <p className="recruiter-dashboard__stat-value">{dashboardStats.activeJobs}</p>
-                {/* </Link> */}
+                  {/* <Link to="/view-job"> */}
+                  <p className="ts-card-label">
+                    Active Job Posts
+                  </p>
+                  <p className="ts-card-value">
+                    {dashboardStats.activeJobs}
+                  </p>
+                  {/* </Link> */}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="recruiter-dashboard__quick-actions recruiter-dashboard__fade-in">
-            <div className="recruiter-dashboard__action-card" onClick={handleIconClick}>
+            <div
+              className="recruiter-dashboard__action-card"
+              onClick={handleIconClick}
+            >
               <div className="recruiter-dashboard__action-content">
                 <div>
-                  <h3 className="recruiter-dashboard__action-title">Post a New Job</h3>
-                  <p className="recruiter-dashboard__action-description">Create a new job posting and find the perfect candidates</p>
+                  <h3 className="recruiter-dashboard__action-title">
+                    Post a New Job
+                  </h3>
+                  <p className="recruiter-dashboard__action-description">
+                    Create a new job posting and find the perfect candidates
+                  </p>
                 </div>
                 <div className="recruiter-dashboard__icon-container recruiter-dashboard__icon-blue">
                   <Plus className="recruiter-dashboard__action-icon" />
@@ -216,11 +257,18 @@ const RecruiterDashboard = () => {
               </div>
             </div>
 
-            <div className="recruiter-dashboard__action-card" onClick={handleIconPostClick}>
+            <div
+              className="recruiter-dashboard__action-card"
+              onClick={handleIconPostClick}
+            >
               <div className="recruiter-dashboard__action-content">
                 <div>
-                  <h3 className="recruiter-dashboard__action-title">View Posted Jobs</h3>
-                  <p className="recruiter-dashboard__action-description">Manage and track your active job postings</p>
+                  <h3 className="recruiter-dashboard__action-title">
+                    View Posted Jobs
+                  </h3>
+                  <p className="recruiter-dashboard__action-description">
+                    Manage and track your active job postings
+                  </p>
                 </div>
                 <div className="recruiter-dashboard__icon-container recruiter-dashboard__icon-green">
                   <Briefcase className="recruiter-dashboard__action-icon" />
@@ -231,9 +279,11 @@ const RecruiterDashboard = () => {
 
           <div className="recruiter-dashboard__table-container recruiter-dashboard__fade-in">
             <div className="recruiter-dashboard__table-header">
-              <h2 className="recruiter-dashboard__table-title">Recent Job Posts</h2>
-              <Link to="/view-job"
-                
+              <h2 className="recruiter-dashboard__table-title">
+                Recent Job Posts
+              </h2>
+              <Link
+                to="/view-job"
                 className="recruiter-dashboard__view-all-button"
               >
                 View all
@@ -255,12 +305,14 @@ const RecruiterDashboard = () => {
                   {jobPosts.slice(0, 2).map((post, index) => (
                     <tr key={`job-post-${post.id}-${index}`}>
                       <td>
-                        <span className="recruiter-dashboard__job-title">{post.job_title}</span>
+                        <span className="recruiter-dashboard__job-title">
+                          {post.job_title}
+                        </span>
                       </td>
                       <td>
                         <div className="recruiter-dashboard__skills-container">
                           {getSkillsArray(post.skills).map((skill, idx) => (
-                            <span 
+                            <span
                               key={idx}
                               className="recruiter-dashboard__skill-tag"
                             >
@@ -275,9 +327,9 @@ const RecruiterDashboard = () => {
                       <td>
                         {post.applicants && post.applicants.length > 0 ? (
                           <div className="recruiter-dashboard__applicant-list">
-                             <div className="recruiter-dashboard__applicant-avatar">
-                                 {post.applicants.length}
-                              </div>
+                            <div className="recruiter-dashboard__applicant-avatar">
+                              {post.applicants.length}
+                            </div>
                             {/* {post.applicants.map((applicant, idx) => (
                               <div 
                                 key={`applicant-${post.id}-${idx}`}
@@ -285,11 +337,13 @@ const RecruiterDashboard = () => {
                               >
                                
                                 {/* <span className="recruiter-dashboard__applicant-avatar">{post.applicants.length}</span> */}
-                              </div>
-                            // ))} */}
-                          // </div>
+                          </div>
                         ) : (
-                          <span className="recruiter-dashboard__no-applicants">No applicants yet</span>
+                          // ))} */}
+                          // </div>
+                          <span className="recruiter-dashboard__no-applicants">
+                            No applicants yet
+                          </span>
                         )}
                       </td>
                     </tr>

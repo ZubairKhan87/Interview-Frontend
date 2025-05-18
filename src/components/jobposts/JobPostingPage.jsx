@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CustomAlert from '../alerts/CustomAlert';
-const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const JobPostingPage = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -51,7 +50,7 @@ const JobPostingPage = () => {
     
     try {
       const accessToken = localStorage.getItem('access');
-      await axios.post(`${BASE_API_URL}/api/job_posting/job_posting/`, jobData, {
+      await axios.post('http://127.0.0.1:8000/api/job_posting/job_posting/', jobData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
@@ -68,7 +67,7 @@ const JobPostingPage = () => {
   };
 
   const handleBack = () => {
-    navigate('/interview');
+    navigate('/recruiter-dashboard');
   };
 
   return (
@@ -83,8 +82,9 @@ const JobPostingPage = () => {
       
       <div className="jp-container">
         <div className="jp-form-container">
-          <button className="jp-back-button" onClick={handleBack}>
-            <span className="jp-arrow">←</span>
+          <button className="jp-submit" onClick={handleBack}>
+            
+           Back →
           </button>
 
           <h1 className="jp-heading">Post a New Job</h1>

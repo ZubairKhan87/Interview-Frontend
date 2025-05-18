@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Clock, Search } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import "../../styles/ApplicantsDetailPage.css";
-const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const ApplicantsDetailsPage = () => {
   const location = useLocation();
@@ -122,8 +121,7 @@ const ApplicantsDetailsPage = () => {
                 onClick={() => navigate('/view-job')}
                 className="adp-back-button"
               >
-                <ArrowLeft size={16} />
-                Back to Jobs
+                Back to Jobs →                
               </button>
              
               <h1 className="adp-page-title">Applicants for {job.title}</h1>
@@ -135,7 +133,9 @@ const ApplicantsDetailsPage = () => {
               </button>
             </div>
             <div className="adp-applicants-count">
-              <Users size={20} />
+              <div className="adp-icon-wrapper">
+                <Users size={20} />
+              </div>
               <span>{applicants.length} Applicants</span>
             </div>
           </div>

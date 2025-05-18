@@ -1,16 +1,15 @@
 import React, { useState,useEffect } from 'react';
 import axiosInstance from '../api/axiosConfig';
 import { useUser } from "../context/UserContext";
-const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 import { 
-  BriefcaseIcon, PlayIcon, NewspaperIcon, 
+  BriefcaseIcon, PlayIcon, NewspaperIcon, SparklesIcon ,
   LogOutIcon, BellIcon, UserCircleIcon, SearchIcon,
   CalendarIcon, CheckCircleIcon, ClockIcon, Building2Icon,
-  TrendingUpIcon, AwardIcon, MessageSquareIcon,
+  TrendingUpIcon, AwardIcon, MessageSquareIcon,XCircleIcon ,PauseCircleIcon,
   BookOpenIcon, GraduationCapIcon, ScrollIcon, 
   BarChartIcon, CalendarClockIcon, StarIcon,
-  FileTextIcon, MapPinIcon, UsersIcon, HeartIcon,ChevronRight,ChevronDownIcon,ChevronRightIcon,PlusIcon   
+  FileTextIcon, MapPinIcon,HourglassIcon ,TimerIcon , UsersIcon, HeartIcon,ChevronRight,ChevronDownIcon,ChevronRightIcon,PlusIcon   
 } from 'lucide-react';
 import "../../styles/CandidateDashboard.css";
 import Arbisoft from '../../assets/Arbisoft.jpg';
@@ -40,6 +39,7 @@ const CandidateDashboard = () => {
   const [incompleteInterview,setIncompleteInterview]=useState([]);
   const [interviewCount,setInterviewCount]=useState(0);
   const [incompletedInterviewCount,setIncompletedInterviewCount]=useState(0)
+  const [pendingInterviewCount,setPendingInterviewCount]=useState(0)
   const navigate = useNavigate();
   // Function to format relative time
   const getRelativeTime = (dateString) => {
@@ -65,7 +65,7 @@ const CandidateDashboard = () => {
         const accessToken = localStorage.getItem('access');
         
         try {
-          const response = await fetch(`${BASE_API_URL}/api/job_posting/publicposts/`, {
+          const response = await fetch('http://127.0.0.1:8000/api/job_posting/publicposts/', {
             headers: {
               'Authorization': `Bearer ${accessToken}`
             }
@@ -117,6 +117,7 @@ const CandidateDashboard = () => {
   useEffect(() => {
     fetchAppliedJobs();
     fetchCandidateId();
+    fetchPendingInterviews();
     fetchInterviewDoneJobs();
     fetchIncompleteInterviews();
   }, []);
@@ -148,6 +149,20 @@ const CandidateDashboard = () => {
       });
   };
 
+  const fetchPendingInterviews=()=>{
+    axiosInstance.get('job_posting/candidate/interview/pending/')
+    .then((response)=>{
+      const pendingInterviewData = response.data;          
+      console.log("Pending interviews data",pendingInterviewData);
+      // setIncompleteInterview(pendingInterviewData);
+      setPendingInterviewCount(pendingInterviewData.length);
+      setLoading(false);
+    })
+    .catch((error)=>{
+      setError(error.message);
+      setLoading(false);
+    })
+  }
   const fetchInterviewDoneJobs=()=>{
     axiosInstance.get('job_posting/candidate/interview/completed/')
     .then((response) =>{
@@ -195,7 +210,7 @@ const CandidateDashboard = () => {
                 return;
             }
 
-            const response = await axios.get(`${BASE_API_URL}/api/authentication/profile/image/`, {
+            const response = await axios.get('http://localhost:8000/api/authentication/profile/image/', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -237,7 +252,7 @@ const handleImageChange = async (event) => {
     const accessToken = localStorage.getItem('access');
     
     const response = await axios.post(
-      `${BASE_API_URL}/api/authentication/profile/image/upload/`,
+      'http://localhost:8000/api/authentication/profile/image/upload/',
       formData,
       {
         headers: {
@@ -347,11 +362,11 @@ const handleImageChange = async (event) => {
             <div className="ts-summary-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
-                  <TrendingUpIcon className="ts-icon-small1" />
+                  <BriefcaseIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-blue" />
                 </div>
                 <div className="ts-card-info">
-                  <p className="ts-card-label">Profile Match Rate</p>
-                  <p className="ts-card-value">85%</p>
+                  <p className="ts-card-label">Total Applied Jobs</p>
+                  <p className="ts-card-value">{applicationCount}</p>
                 </div>
               </div>
             </div>
@@ -359,19 +374,7 @@ const handleImageChange = async (event) => {
             <Link to="/applied-jobs" className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
-                  <BriefcaseIcon className="ts-icon-small1" />
-                </div>
-                <div className="ts-card-info">
-                  <p className="ts-card-label">Total Applied Jobs</p>
-                  <p className="ts-card-value">{applicationCount}</p>
-                </div>
-              </div>
-            </Link>
-            
-            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
-              <div className="ts-card-content">
-                <div className="ts-card-icon">
-                  <MessageSquareIcon className="ts-icon-small1" />
+                  <CheckCircleIcon   className="recruiter-dashboard__icon-container recruiter-dashboard__icon-green" />
                 </div>
                 <div className="ts-card-info">
                   <p className="ts-card-label">Completed Interviews</p>
@@ -379,7 +382,30 @@ const handleImageChange = async (event) => {
                 </div>
               </div>
             </Link>
+            
+            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
+              <div className="ts-card-content">
+                <div className="ts-card-icon">
+                  <TimerIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple" />
+                </div>
+                <div className="ts-card-info">
+                  <p className="ts-card-label"> Pending Interviews</p>
+                  <p className="ts-card-value">{pendingInterviewCount}</p>
+                </div>
+              </div>
+            </Link>
 
+            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
+              <div className="ts-card-content">
+                <div className="ts-card-icon">
+                  <PauseCircleIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-orange" />
+                </div>
+                <div className="ts-card-info">
+                  <p className="ts-card-label">Incompleted Interviews</p>
+                  <p className="ts-card-value">{incompletedInterviewCount}</p>
+                </div>
+              </div>
+            </Link>
             
           </div>
           
@@ -387,7 +413,7 @@ const handleImageChange = async (event) => {
           <div className="ts-content-card">
             <div className="ts-card-header">
               <div className="ts-header-title">
-                <PlayIcon className="ts-header-icon" />
+                <SparklesIcon      Icon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-blue" />
                 <h2 className="ts-heading">Recent Job Posts</h2>
               </div>
               <Link to="/publicposts" className="ts-view-all-link">
@@ -402,7 +428,7 @@ const handleImageChange = async (event) => {
                   <div className="ts-item-content">
                     <div className="ts-item-info">
                       <div className="ts-item-icon">
-                        <BriefcaseIcon className="ts-icon-small1" />
+                        <FileTextIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple" />
                       </div>
                       <div className="ts-item-details">
                         <h3 className="ts-item-title">{job?.title || 'Software Engineer'}</h3>
@@ -442,7 +468,7 @@ const handleImageChange = async (event) => {
           <div className="ts-content-card">
             <div className="ts-card-header">
               <div className="ts-header-title">
-                <BriefcaseIcon className="ts-header-icon" />
+                <BriefcaseIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-blue" />
                 <h2 className="ts-heading">Recent Applied Jobs</h2>
               </div>
               <Link to="/applied-jobs" className="ts-view-all-link">
@@ -457,7 +483,7 @@ const handleImageChange = async (event) => {
                   <div className="ts-item-content">
                     <div className="ts-item-info">
                       <div className="ts-item-icon">
-                        <FileTextIcon className="ts-icon-small1" />
+                        <FileTextIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple" />
                       </div>
                       <div className="ts-item-details">
                         <h3 className="ts-item-title">{app?.title || 'Software Engineer'}</h3>
@@ -500,10 +526,10 @@ const handleImageChange = async (event) => {
         <div className="interviews-grid-full">
           <div className="interviews-grid-container">
             {/* Completed Interviews */}
-            <div className="interview-card">
+            <div className="interview-card"> 
               <div className="interview-card-header">
                 <div className="header-title">
-                  <CheckCircleIcon className="header-icon completed-icon" />
+                  <CheckCircleIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-green" />
                   <h2 className="header-text">Completed Interviews</h2>
                 </div>
                 <Link to="/interview/completed" className="view-all-link">
@@ -548,7 +574,7 @@ const handleImageChange = async (event) => {
             <div className="interview-card">
               <div className="interview-card-header">
                 <div className="header-title">
-                  <ClockIcon className="header-icon pending-icon" />
+                  <ClockIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-orange" />
                   <h2 className="header-text">Incompleted Interviews</h2>
                 </div>
                 <Link to="/interview/incompleted" className="view-all-link">
@@ -590,6 +616,73 @@ const handleImageChange = async (event) => {
             </div>
           </div>
         </div>
+        
+        {/* <div className="additional-sections-full">
+          <div className="section-card-full">
+            <div className="section-header">
+              <div className="header-title">
+                <HeartIcon className="header-icon heart-icon" />
+                <h2 className="header-text">Saved Jobs</h2>
+              </div>
+            </div>
+            
+            <div className="job-list-full">
+              {savedJobs.map((job, index) => (
+                <div key={index} className="job-item">
+                  <div className="job-content">
+                    <div className="company-logo">
+                      <img 
+                        src={job.company === 'Arbisoft' ? Arbisoft : Netsol} 
+                        alt={job.company} 
+                        className="logo-image"
+                      />
+                    </div>
+                    <div className="job-info">
+                      <h3 className="job-role">{job.role}</h3>
+                      <p className="job-company">{job.company} • {job.location}</p>
+                      <span className="job-salary">{job.salary}</span>
+                    </div>
+                    <button className="favorite-button">
+                      <HeartIcon className="favorite-icon" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div> */}
+          {/* </div> */}
+          
+          {/* Learning Path */}
+          
+        {/* </div>
+        
+        <div className="section-card-full events-section-full">
+          <div className="section-header">
+            <div className="header-title">
+              <CalendarClockIcon className="header-icon calendar-icon" />
+              <h2 className="header-text">Events & Workshops</h2>
+            </div>
+          </div> */}
+          
+          {/* <div className="events-list-full">
+            {events.map((event, index) => (
+              <div key={index} className="event-item">
+                <div className="event-content">
+                  <div className="event-date-block">
+                    <span className="event-month">{event.month}</span>
+                    <span className="event-day">{event.date}</span>
+                  </div>
+                  <div className="event-info">
+                    <h3 className="event-title">{event.title}</h3>
+                    <p className="event-details">{event.type} • {event.time}</p>
+                  </div> */}
+                  {/* <button className="join-button">
+                    Join
+                  </button> */}
+                {/* </div>
+              </div>
+            ))} */}
+          {/* </div> */}
+        {/* </div> */}
       </div>
     </div>
   </div>

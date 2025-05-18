@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import CustomDialog from '../alerts/CustomDialog';
 import '../../styles/JobPosts.css';
-const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const AllJobsPage = () => {
 
@@ -188,13 +187,13 @@ const AllJobsPage = () => {
             </div>
 
             <div className="button-group">
-              <button className="btn btn-light-primary" onClick={() => handleEditJob(job)}>
+              <button className="btn btn-primary" onClick={() => handleEditJob(job)}>
               <EditIcon size={16} /> Edit
             </button>
-            <button className="btn btn-light-danger" onClick={() => setJobToDelete(job.id)}>
+            <button className="btn btn-danger" onClick={() => setJobToDelete(job.id)}>
               <DeleteIcon size={16} /> Delete
             </button>
-            <button className="btn btn-light-success" onClick={() => handleCheckApplicants(job)}>
+            <button className="btn btn-success" onClick={() => handleCheckApplicants(job)}>
               <UsersIcon size={16} /> View Applicants
             </button>
 
@@ -221,7 +220,7 @@ const AllJobsPage = () => {
         className="btn btn-primary"
         onClick={() => navigate('/recruiter-dashboard')}
       >
-        Back to Dashboard
+        Back to Dashboard →
       </button>
       <h2 className="page-title">Posted Jobs</h2>
 

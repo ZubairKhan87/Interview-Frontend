@@ -11,7 +11,6 @@ import { Button, Tooltip, message, Spin } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { color } from 'framer-motion';
 // import { Button, Tooltip, message, Spin } from 'antd';
-const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const ApplicantProfilePage = () => {
   const location = useLocation();
@@ -271,9 +270,8 @@ const ApplicantProfilePage = () => {
         <div style={styles.headerActions}>
           <Button type="primary"  onClick={() => navigate(-1)}>
             
-            <ArrowLeft style={styles.icon} />
             
-            Back
+            Back →
           </Button>
           
           {hasFrames && (

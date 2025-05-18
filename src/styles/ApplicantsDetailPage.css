@@ -100,13 +100,23 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    background-color: #f1f5f9;
+    background-color: #f1f9f4;
     border-radius: 0.375rem;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #475569;
+    color: #070707;
+    
   }
   
+  .adp-icon-wrapper {
+  background-color: #e0f2fe; /* light blue */
+  padding: 0.4rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb; /* Blue icon color */
+}
   /* Empty state */
   .adp-empty-state {
     display: flex;
@@ -145,19 +155,22 @@
   
   /* Applicant cards */
   .adp-applicant-card {
-    border-radius: 0.5rem;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    height: 100%;
-  }
-  
-  .adp-card-content {
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.adp-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* ensures space between content and button */
+  padding: 1.25rem;
+  height: 100%;
+}
   
   .adp-card-header {
     display: flex;
@@ -210,18 +223,23 @@
   }
   
   .adp-view-profile-button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.375rem;
-    background-color: #3b82f6;
-    color: #ffffff;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-    margin-top: auto;
-  }
+    padding: 0.5rem 1.25rem;      /* Increased horizontal and vertical padding */
+
+  /* font-size: 0.75rem; */
+    font-size: 0.875rem;          /* Larger text (14px) */
+
+  border: none;
+  border-radius: 0.375rem;
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  align-self: center; /* center the button horizontally */
+  margin-top: 1rem;   /* spacing above */
+}
   
   .adp-view-profile-button:hover {
     background-color: #2563eb;
