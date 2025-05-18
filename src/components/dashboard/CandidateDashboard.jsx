@@ -358,7 +358,11 @@ if (error) {
           <div className="ts-summary-grid">
             <div className="ts-summary-card">
 
-              <div className="ts-card-content">
+              
+            </div>
+            <div className="ts-summary-card ts-link-card">
+
+            <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <BriefcaseIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-blue" />
                 </div>
@@ -367,8 +371,8 @@ if (error) {
                   <p className="ts-card-value">{applicationCount}</p>
                 </div>
               </div>
-            </div>
-                <Link className="ts-summary-card ts-link-card">
+              </div>
+                <div className="ts-summary-card ts-link-card">
 
               <div className="ts-card-content">
                 <div className="ts-card-icon">
@@ -379,8 +383,8 @@ if (error) {
                   <p className="ts-card-value">{interviewCount}</p>
                 </div>
               </div>
-            </Link>
-            <Link className="ts-summary-card ts-link-card">
+            </div>
+            <div className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <TimerIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple" />
@@ -390,9 +394,9 @@ if (error) {
                   <p className="ts-card-value">{pendingInterviewCount}</p>
                 </div>
               </div>
-            </Link>
+            </div>
 
-            <Link className="ts-summary-card ts-link-card">
+            <div className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <PauseCircleIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-orange" />
@@ -402,7 +406,7 @@ if (error) {
                   <p className="ts-card-value">{incompletedInterviewCount}</p>
                 </div>
               </div>
-            </Link>
+            </div>
             
           </div>
           
