@@ -251,7 +251,7 @@ const handleImageChange = async (event) => {
     const accessToken = localStorage.getItem('access');
     
     const response = await axios.post(
-      'http://localhost:8000/api/authentication/profile/image/upload/',
+      `${BASE_API_URL}/api/authentication/profile/image/upload/`,
       formData,
       {
         headers: {

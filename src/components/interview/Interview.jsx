@@ -2,36 +2,33 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import logo from '../../assets/logo.png';
-import "../../styles/Interview.css"; // Assuming Chatbot.css styles Interview
-const BASE_API_URL = import.meta.env.VITE_API_URL;
+import "../../styles/Interview.css";
 
 // Placeholder logo component
 const CompanyLogo = () => (
     <div
         style={{
-            width: '100px', // Adjust width to fit the logo
-            height: '100px', // Adjust height to fit the logo
-            backgroundColor: '#3498db', // Background color for the container
+            width: '100px',
+            height: '100px',
+            backgroundColor: '#3498db',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: '10%', // Optional: Makes the container circular
-            overflow: 'hidden', // Ensures the logo doesn't overflow the container
-            marginLeft:'10px'
+            borderRadius: '10%',
+            overflow: 'hidden',
+            marginLeft: '10px'
         }}
     >
-        {/* Logo */}
         <img
-            src={logo} // Replace `logo` with the actual path or imported image
+            src={logo}
             alt="TalentScout Logo"
             style={{
-                maxWidth: '100%', // Ensures the logo scales proportionally
-                maxHeight: '100%', // Prevents overflow from the container
+                maxWidth: '100%',
+                maxHeight: '100%',
             }}
         />
     </div>
 );
-
 
 // Timer Component
 const InterviewTimer = ({ duration = 300 }) => {
@@ -65,20 +62,13 @@ const InterviewTimer = ({ duration = 300 }) => {
                 {`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`}
             </div>
             <div>Time Remaining</div>
-            
         </div>
     );
 };
 
-// Webcam Placeholder
-// Remove any duplicate React imports at the top
-// Just keep these if you don't already have them
-
-// Create axios instance with default config
-// Create axios instance with default config
 // Create a separate axios instance for frame uploads
 const frameApi = axios.create({
-    baseURL: `${BASE_API_URL}`,
+    baseURL: 'http://localhost:8000',
     withCredentials: true
 });
 
@@ -97,6 +87,7 @@ const WebcamFeed = () => {
     const canvasRef = useRef(document.createElement('canvas'));
     const location = useLocation();
     const { jobId, candidateId } = location.state || {};
+    const frameIntervalRef = useRef(null);
 
     // Function to get CSRF token and set up cookie
     const setupCSRF = async () => {
@@ -111,7 +102,6 @@ const WebcamFeed = () => {
 
     const captureFrame = async () => {
         if (!videoRef.current || !streamRef.current) {
-            console.log('Video or stream not ready');
             return;
         }
     
@@ -119,7 +109,6 @@ const WebcamFeed = () => {
         const canvas = canvasRef.current;
         
         if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-            console.log('Video not ready for capture');
             return;
         }
     
@@ -158,7 +147,7 @@ const WebcamFeed = () => {
                 await setupCSRF();
             }
     
-            const response = await frameApi.post('/api/chat/save-frame/', formData, {
+            await frameApi.post('/api/chat/save-frame/', formData, {
                 headers: {
                     'X-CSRFToken': document.cookie
                         .split('; ')
@@ -167,19 +156,13 @@ const WebcamFeed = () => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-    
-            console.log('Frame saved:', response.data);
         } catch (error) {
             console.error('Error capturing/sending frame:', error.message);
-            // } else {
-            //     console.error('Error capturing/sending frame:', error.message);
-            // }
         }
     };
 
     useEffect(() => {
         let mounted = true;
-        let frameInterval;
 
         const startWebcam = async () => {
             try {
@@ -213,7 +196,11 @@ const WebcamFeed = () => {
                     
                     videoRef.current.onloadedmetadata = () => {
                         videoRef.current.play();
-                        frameInterval = setInterval(captureFrame, 5000);
+                        // Start frame capture at a reduced rate (every 5 seconds)
+                        if (frameIntervalRef.current) {
+                            clearInterval(frameIntervalRef.current);
+                        }
+                        frameIntervalRef.current = setInterval(captureFrame, 5000);
                     };
                 }
             } catch (err) {
@@ -234,8 +221,9 @@ const WebcamFeed = () => {
             if (videoRef.current) {
                 videoRef.current.srcObject = null;
             }
-            if (frameInterval) {
-                clearInterval(frameInterval);
+            if (frameIntervalRef.current) {
+                clearInterval(frameIntervalRef.current);
+                frameIntervalRef.current = null;
             }
         };
 
@@ -264,6 +252,7 @@ const WebcamFeed = () => {
         </div>
     );
 };
+
 // Instructions for Candidates
 const Instructions = () => (
     <div style={{
@@ -277,7 +266,7 @@ const Instructions = () => (
             <li>Ensure your microphone and camera are working properly.</li>
             <li>Answer the questions clearly and concisely.</li>
             <li>Wait for the next question after completing your response.</li>
-            <li>You can not reset the interview once instead get started.</li>
+            <li>You cannot reset the interview once it has started.</li>
         </ul>
     </div>
 );
@@ -286,14 +275,9 @@ const Chat = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { jobId, candidateId, jobTitle } = location.state || {};
-    const [currentQuestion, setCurrentQuestion] = useState('');
     const [displayedQuestion, setDisplayedQuestion] = useState('');
     const [currentAnswer, setCurrentAnswer] = useState('');
-    const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
-    const [currentTranscript, setCurrentTranscript] = useState('');
-    const recognitionRef = useRef(null);
-    const synthesisRef = useRef(null);
     const typingSpeedRef = useRef(null);
     const [questionCount, setQuestionCount] = useState(0);
     const [interviewEnded, setInterviewEnded] = useState(false);
@@ -302,9 +286,28 @@ const Chat = () => {
     const [isInterviewActive, setIsInterviewActive] = useState(true);
     const [recordingStatus, setRecordingStatus] = useState('');
     const [isRecording, setIsRecording] = useState(false);
+    const [isInterviewStarted, setIsInterviewStarted] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(true);
+    
+    // Refs for audio handling
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
-
+    const audioRef = useRef(null);
+    const audioContextRef = useRef(null);
+    const speechTimeoutRef = useRef(null);
+    
+    // Use this to update application status on the backend
+    const updateApplicationStatus = async (status) => {
+        try {
+            await axios.post('http://localhost:8000/api/applications/update-status/', {
+                job_id: jobId,
+                candidate_id: candidateId,
+                status: status
+            });
+        } catch (error) {
+            console.error('Error updating application status:', error);
+        }
+    };
     
     // Enhanced navigation prevention
     useEffect(() => {
@@ -332,9 +335,7 @@ const Chat = () => {
                 
                 // Attempt to end interview
                 try {
-                    axios.post(`${BASE_API_URL}/api/chat/chat/`, {
-                        // message: 'Interview forcefully terminated',
-                        // intent: 'Quit_interview',
+                    axios.post('http://localhost:8000/api/chat/chat/', {
                         job_id: jobId,
                         candidate_id: candidateId
                     });
@@ -357,7 +358,7 @@ const Chat = () => {
         };
     }, [isInterviewActive, jobId, candidateId]);
 
-    // Additional route protection
+    // Route protection
     useEffect(() => {
         // Check if user is allowed to be on this page
         const checkRouteAccess = () => {
@@ -373,372 +374,403 @@ const Chat = () => {
         checkRouteAccess();
     }, [isInterviewActive, navigate]);
 
-    // Modify existing navigation methods to include additional checks
+    // Handle interview termination
     const handleInterviewTermination = useCallback(async (reason = 'Interview terminated') => {
         try {
-            await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
-                // message: reason,
-                // intent: 'Quit_interview',
+            // Clean up audio resources
+            cleanupAudioResources();
+            
+            await axios.post('http://localhost:8000/api/chat/chat/', {
                 job_id: jobId,
                 candidate_id: candidateId
             });
 
             // Update application status
-            await updateApplicationStatus('aborted');
+            await updateApplicationStatus('completed');
 
             // Disable further navigation
             setIsInterviewActive(false);
+            setInterviewEnded(true);
 
-            // Redirect to a specific page
-            navigate('/thank-you', { 
-                state: { 
-                    message: 'Interview was terminated.',
-                    preventBack: true 
-                } 
-            });
+            // Redirect to a specific page after a delay to allow final message to be heard
+            setTimeout(() => {
+                navigate('/thank-you', { 
+                    state: { 
+                        message: 'Interview completed successfully.',
+                        preventBack: true 
+                    } 
+                });
+            }, 4000);
         } catch (error) {
             console.error('Error handling interview termination:', error);
             navigate('/applied-jobs');
         }
     }, [jobId, candidateId, navigate]);
 
-    // Existing useEffect for interview initialization
-    useEffect(() => {
-        // Check if we have the required parameters
-        if (!jobId || !candidateId) {
-            console.error('Missing required parameters');
-            navigate('/applied-jobs');
+    // Cleanup function for audio resources
+    const cleanupAudioResources = useCallback(() => {
+        // Cancel any text animation
+        if (typingSpeedRef.current) {
+            clearInterval(typingSpeedRef.current);
+            typingSpeedRef.current = null;
+        }
+        
+        // Stop any speech synthesis
+        if (audioRef.current) {
+            audioRef.current.pause();
+            if (audioRef.current.src) {
+                URL.revokeObjectURL(audioRef.current.src);
+            }
+            audioRef.current = null;
+        }
+        
+        // Clear any timeouts
+        if (speechTimeoutRef.current) {
+            clearTimeout(speechTimeoutRef.current);
+            speechTimeoutRef.current = null;
+        }
+        
+        // Stop any recording
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+            mediaRecorderRef.current = null;
+        }
+        
+        // Reset audio chunks
+        audioChunksRef.current = [];
+        
+        // Close audio context if open
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+            audioContextRef.current.close().catch(err => console.error('Error closing audio context:', err));
+            audioContextRef.current = null;
+        }
+    }, []);
+    
+    // Animate text with improved handling
+    const animateText = useCallback((text) => {
+        // Clean up any existing animation
+        if (typingSpeedRef.current) {
+            clearInterval(typingSpeedRef.current);
+            typingSpeedRef.current = null;
+        }
+        
+        if (!text) {
+            setDisplayedQuestion('');
             return;
         }
-    
-        // Initialize speech recognition and synthesis
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            recognitionRef.current = new SpeechRecognition();
-            recognitionRef.current.continuous = true;
-            recognitionRef.current.interimResults = true;
-            recognitionRef.current.lang = 'en-US';
-
-            recognitionRef.current.onresult = (event) => {
-                let interimTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
-                }
-                setCurrentTranscript(prevTranscript => prevTranscript + ' ' + interimTranscript);
-            };
-
-            recognitionRef.current.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-            };
-        }
-
-        synthesisRef.current = window.speechSynthesis;
-        resetInterview();
-
-        return () => {
-            if (recognitionRef.current) {
-                recognitionRef.current.stop();
-            }
-            if (synthesisRef.current) {
-                synthesisRef.current.cancel();
-            }
-            if (typingSpeedRef.current) {
-                clearInterval(typingSpeedRef.current);
-            }
-        };
-    }, [jobId, candidateId]);
-
-    // Ref to store the typing animation interval
-
-// Function to handle typing animation with text integrity
-const animateText = (text) => {
-    if (!text) return; // Guard clause for empty text
-    
-    let index = 0;
-    setDisplayedQuestion('');
-    
-    // Clear any existing interval
-    if (typingSpeedRef.current) {
-        clearInterval(typingSpeedRef.current);
-    }
-
-    // Create a clean copy of the text to animate
-    const textToAnimate = text.toString();
-
-    // Create new interval for typing animation
-    typingSpeedRef.current = setInterval(() => {
-        if (index < textToAnimate.length) {
-            setDisplayedQuestion(textToAnimate.substring(0, index + 1));
-            index++;
-        } else {
-            clearInterval(typingSpeedRef.current);
-        }
-    }, 50);
-};
-
-// Reset interview function with proper error handling
-const resetInterview = useCallback(async () => {
-    try {
-        const response = await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
-            reset: true,
-            job_id: jobId,
-            candidate_id: candidateId,
-            candidateName: candidateName,
-        });
         
-        if (response.data?.reset && response.data?.response) {
-            const questionText = response.data.response.trim();
-            setCurrentQuestion(questionText);
-            animateText(questionText);
-            speakMessage(questionText);
-            setQuestionCount(0);
-            setInterviewEnded(false);
-            setLastIntent('');
-            if (response.data.candidateName) {
-                setCandidateName(response.data.candidateName);
-            }
-        }
-        setIsInterviewActive(true);
-    } catch (error) {
-        setIsInterviewActive(false);
-        console.error('Error resetting interview:', error);
-    }
-}, [jobId, candidateId, candidateName]);
-
-// Speak message function with improved text handling
-// const speakMessage = (message) => {
-//     if (!synthesisRef.current || !message) return;
-
-//     // Cancel any ongoing speech
-//     synthesisRef.current.cancel();
-    
-//     // Create clean copy of message
-//     const cleanMessage = message.toString().trim();
-    
-//     const utterance = new SpeechSynthesisUtterance(cleanMessage);
-//     utterance.rate = 1.1;
-    
-//     // Set specific language for accent (British English in this example)
-//     utterance.lang = 'en-GB';
-    
-//     // Try to find a specific voice for the desired accent
-//     const voices = synthesisRef.current.getVoices();
-    
-//     // Look for a British English voice
-//     const britishVoice = voices.find(voice => 
-//         voice.lang === 'en-GB' && !voice.localService
-//     );
-    
-//     // If a British voice is found, use it
-//     if (britishVoice) {
-//         utterance.voice = britishVoice;
-//     }
-
-//     let index = 0;
-//     const interval = 50;
-    
-//     // Clear existing text before animation
-//     setCurrentQuestion('');
-
-//     // Use substring for more reliable text handling
-//     const typingInterval = setInterval(() => {
-//         if (index <= cleanMessage.length) {
-//             setCurrentQuestion(cleanMessage.substring(0, index));
-//             index++;
-//         } else {
-//             clearInterval(typingInterval);
-//         }
-//     }, interval);
-
-//     setIsSpeaking(true);
-    
-//     utterance.onend = () => {
-//         setIsSpeaking(false);
-//         startListening();
-//     };
-
-//     synthesisRef.current.speak(utterance);
-// };
-const startRecording = useCallback(() => {
-    audioChunksRef.current = [];
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            mediaRecorderRef.current = new MediaRecorder(stream);
-            
-            mediaRecorderRef.current.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                }
-            };
-
-            mediaRecorderRef.current.start(200);
-            setIsRecording(true);
-            setRecordingStatus('Recording... Speak now');
-        })
-        .catch(error => {
-            console.error('Error accessing microphone:', error);
-            setRecordingStatus('Error: Could not access microphone');
-        });
-}, []);
-
-const speakMessage = useCallback((message) => {
-    if (synthesisRef.current) {
-        synthesisRef.current.cancel();
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.rate = 0.9;
-
+        // Create a clean copy of the text
+        const textToAnimate = String(text).trim();
         let index = 0;
-        const interval = 50;
         setDisplayedQuestion('');
-
-        const typingInterval = setInterval(() => {
-            setDisplayedQuestion((prev) => prev + message[index]);
-            index++;
-            if (index >= message.length) {
-                clearInterval(typingInterval);
+        
+        // Create new typing animation
+        typingSpeedRef.current = setInterval(() => {
+            if (index < textToAnimate.length) {
+                setDisplayedQuestion(textToAnimate.substring(0, index + 1));
+                index++;
+            } else {
+                clearInterval(typingSpeedRef.current);
+                typingSpeedRef.current = null;
             }
-        }, interval);
+        }, 30); // Slightly faster typing for better UX
+    }, []);
 
+    // Speak message using Groq TTS API
+    const speakMessage = useCallback((message) => {
+        // Clean up any existing audio
+        cleanupAudioResources();
+        
+        if (!message) return;
+        
+        const textToSpeak = String(message).trim();
+        
+        // Start the typing animation
+        animateText(textToSpeak);
+        
+        // Set speaking state
         setIsSpeaking(true);
-        utterance.onend = () => {
+        
+        // Call Groq API to generate speech
+        fetch("https://api.groq.com/openai/v1/audio/speech", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer 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`
+                //API_gsk_jFRQkWV7ykR6yzScRxPAWGdyb3FYrQAFHLP2W0ubi2syHxASye7Y
+                //API_gsk_aaViIpcvjGrz3rGpgvGXWGdyb3FYrQikdgA07LsdHKb3fdjFRuIS
+            },
+            body: JSON.stringify({
+                model: "playai-tts",
+                voice: "Arista-PlayAI",
+                input: textToSpeak,
+                response_format: "wav"
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            return response.arrayBuffer();
+        })
+        .then(audioArrayBuffer => {
+            // Create audio blob and play it
+            const audioBlob = new Blob([audioArrayBuffer], { type: "audio/wav" });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            
+            // Store reference to audio
+            audioRef.current = audio;
+            
+            // Set up the onended event handler
+            audio.onended = () => {
+                setIsSpeaking(false);
+                URL.revokeObjectURL(audioUrl);
+                
+                // Add a short delay before starting recording to prevent audio overlap
+                speechTimeoutRef.current = setTimeout(() => {
+                    startRecording();
+                }, 800);
+            };
+            
+            // Play the audio
+            audio.play().catch(err => {
+                console.error("Error playing audio:", err);
+                setIsSpeaking(false);
+                startRecording(); // Fallback to recording if audio fails
+            });
+        })
+        .catch(err => {
+            console.error("Error generating speech:", err);
             setIsSpeaking(false);
-            startRecording();
+            // Even if TTS fails, we start recording after a short delay
+            speechTimeoutRef.current = setTimeout(() => {
+                startRecording();
+            }, 1000);
+        });
+    }, [animateText, cleanupAudioResources]);
 
-        };
+    // Start recording function with improved error handling
+    const startRecording = useCallback(() => {
+        // Clean up any existing recording
+        audioChunksRef.current = [];
+        
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+        }
+        
+        // Request microphone access with proper error handling
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                // Stop any existing tracks
+                if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+                    mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+                }
+                
+                // Create a new media recorder with the stream
+                mediaRecorderRef.current = new MediaRecorder(stream);
+                
+                // Set up data handling
+                mediaRecorderRef.current.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        audioChunksRef.current.push(event.data);
+                    }
+                };
+                
+                // Handle recorder errors
+                mediaRecorderRef.current.onerror = (event) => {
+                    console.error('Media Recorder error:', event.error);
+                    setRecordingStatus('Recording error occurred');
+                    setIsRecording(false);
+                };
 
-        synthesisRef.current.speak(utterance);
-    }
-}, [startRecording]);
-// const startListening = () => {
-//     if (recognitionRef.current) {
-//         setCurrentTranscript('');
-//         recognitionRef.current.start();
-//         setIsListening(true);
-//     }
-// };
+                // Start recording with short time slices for better responsiveness
+                mediaRecorderRef.current.start(200);
+                setIsRecording(true);
+                setRecordingStatus('Recording... Speak now');
+                
+                // Create audio meter to visualize audio levels (optional enhancement)
+                try {
+                    if (!audioContextRef.current) {
+                        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    
+                    // Additional audio processing could be added here
+                } catch (err) {
+                    console.error('Audio context error:', err);
+                }
+            })
+            .catch(error => {
+                console.error('Error accessing microphone:', error);
+                setRecordingStatus('Error: Could not access microphone');
+                
+                // If this is the first question, we need to handle the error more gracefully
+                if (questionCount === 0) {
+                    alert('Microphone access is required for the interview. Please allow access and try again.');
+                }
+            });
+    }, [questionCount]);
 
-// // Ensure it restarts when it stops
-// useEffect(() => {
-//     if (recognitionRef.current) {
-//         recognitionRef.current.onend = () => {
-//             if (isListening) {
-//                 recognitionRef.current.start();  // Restart listening if not muted
-//             }
-//         };
-
-//         recognitionRef.current.onerror = (event) => {
-//             console.error('Speech recognition error:', event.error);
-//             if (event.error === 'no-speech' && isListening) {
-//                 recognitionRef.current.start();  // Restart on no-speech errors
-//             }
-//         };
-//     }
-// }, [isListening]);
-
-// const stopListeningAndSend = async () => {
-//     if (recognitionRef.current) {
-//         recognitionRef.current.stop();
-//         setIsListening(false);
-//     }
-
-//     const trimmedTranscript = currentTranscript.trim();
-//     if (trimmedTranscript) {
-//         setCurrentAnswer(trimmedTranscript);
-
-//         try {
-//             const response = await axios.post('http://localhost:8000/api/chat/chat/', {
-//                 message: trimmedTranscript,
-//                 job_id: jobId,
-//                 candidate_id: candidateId,
-//                 candidateName: candidateName
-//             });
-
-//             setLastIntent(response.data.intent);
-//             setQuestionCount(response.data.question_count);
-
-//             if (response.data.intent === 'Quit_interview' || response.data.interview_ended) {
-//                 await handleInterviewTermination('Interview completed');
-//                 return;
-//             }
-
-//             const nextQuestion = response.data.response;
-//             setCurrentQuestion(nextQuestion);
-//             animateText(nextQuestion);
-//             setCurrentAnswer('');
-//             speakMessage(nextQuestion);
-//         } catch (error) {
-//             console.error('Error sending message:', error);
-//         }
-
-//         setCurrentTranscript('');
-//     }
-// };
-
-const stopRecordingAndSend = async () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+    // Stop recording and send for transcription
+    const stopRecordingAndSend = useCallback(async () => {
+        if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') {
+            console.warn('No active recording to stop');
+            return;
+        }
+        
         setIsRecording(false);
         setRecordingStatus('Processing your answer...');
+        
+        // Create a promise to handle the recorder stop event
+        const recordingStoppedPromise = new Promise((resolve) => {
+            mediaRecorderRef.current.onstop = () => resolve();
+        });
         
         // Stop the recording
         mediaRecorderRef.current.stop();
         
-        // Wait for the recorder to finish and collect all data
-        mediaRecorderRef.current.onstop = async () => {
+        // Wait for the recorder to finish
+        await recordingStoppedPromise;
+        
+        try {
+            // Create a blob from the audio chunks
+            if (!audioChunksRef.current.length) {
+                throw new Error('No audio data recorded');
+            }
+            
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            
+            // Create form data to send the audio file
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            
+            // Send the audio to the backend for transcription
+            const transcriptionResponse = await frameApi.post('/api/chat/transcribe/', 
+                formData, 
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+            
+            // Get the transcribed text
+            const transcribedText = transcriptionResponse.data.transcription;
+            setCurrentAnswer(transcribedText || "No speech detected");
+            
+            if (!transcribedText) {
+                setRecordingStatus('No speech detected. Please try again.');
+                return;
+            }
+            
+            // Send the transcribed text for processing
+            const chatResponse = await axios.post('http://localhost:8000/api/chat/chat/', {
+                message: transcribedText,
+                job_id: jobId,
+                candidate_id: candidateId,
+                candidateName: candidateName
+            });
+            
+            // Process the response
+            setLastIntent(chatResponse.data.intent || '');
+            setQuestionCount(chatResponse.data.question_count || 0);
+            
+            // Check if interview has ended
+            if (chatResponse.data.intent === 'Quit_interview' || chatResponse.data.interview_ended) {
+                // Speak the final message before ending
+                speakMessage(chatResponse.data.response);
+                
+                // End the interview after the message is spoken
+                await handleInterviewTermination('Interview completed');
+                return;
+            }
+            
+            // Continue with next question
+            const nextQuestion = chatResponse.data.response;
+            setCurrentAnswer('');
+            
+            // Slight delay before speaking next question for better flow
+            setTimeout(() => {
+                speakMessage(nextQuestion);
+            }, 500);
+            
+        } catch (error) {
+            console.error('Error processing audio:', error);
+            setRecordingStatus('Error processing your answer. Please try again.');
+            
+            // After a delay, restart recording so the interview can continue
+            setTimeout(() => {
+                startRecording();
+            }, 2000);
+        }
+    }, [jobId, candidateId, candidateName, speakMessage, handleInterviewTermination, startRecording]);
+
+    // Initialize the interview
+    const initializeInterview = useCallback(async () => {
+        setIsInitializing(true);
+        
+        try {
+            // Check if we have the required parameters
+            if (!jobId || !candidateId) {
+                console.error('Missing required parameters');
+                navigate('/applied-jobs');
+                return;
+            }
+            
+            // Request microphone permission early
             try {
-                // Create a blob from the audio chunks
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Stop the stream right away, we just wanted to get permission
+                stream.getTracks().forEach(track => track.stop());
+            } catch (err) {
+                console.error('Failed to get microphone permission:', err);
+                alert('Microphone access is required for the interview. Please allow access and reload the page.');
+            }
+            
+            // Start the interview by requesting the first question
+            const response = await axios.post('http://localhost:8000/api/chat/chat/', {
+                reset: true,
+                job_id: jobId,
+                candidate_id: candidateId
+            });
+            
+            if (response.data?.reset && response.data?.response) {
+                const questionText = response.data.response.trim();
                 
-                // Create form data to send the audio file
-                const formData = new FormData();
-                formData.append('audio', audioBlob, 'recording.webm');
-                
-                // Send the audio to the backend for transcription
-                const transcriptionResponse = await frameApi.post('/api/chat/transcribe/', 
-                    formData, 
-                    { headers: { 'Content-Type': 'multipart/form-data' } }
-                );
-                
-                const transcribedText = transcriptionResponse.data.transcription;
-                setCurrentAnswer(transcribedText);
-                console.log('Transcribed text:', transcribedText);
-                // Send the transcribed text for processing
-                const chatResponse = await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
-                    message: transcribedText,
-                    job_id: jobId,
-                    candidate_id: candidateId,
-                    candidateName: candidateName
-                });
-                setLastIntent(chatResponse.data.intent);
-                setQuestionCount(chatResponse.data.question_count);
-                if (chatResponse.data.intent === 'Quit_interview' || chatResponse.data.interview_ended) {
-                    speakMessage(chatResponse.data.response);
-                    await handleInterviewTermination('Interview completed');
-                // return;
-                    setTimeout(() => {
-                        navigate('/thank-you');
-                    }, 4000);
-                    return;
+                // Set candidate name if available
+                if (response.data.candidateName) {
+                    setCandidateName(response.data.candidateName);
                 }
                 
-                const nextQuestion = chatResponse.data.response;
-                setDisplayedQuestion(nextQuestion);
-                setCurrentAnswer('');
-                speakMessage(nextQuestion);
+                // Reset interview state
+                setQuestionCount(0);
+                setInterviewEnded(false);
+                setLastIntent('');
+                setIsInterviewActive(true);
                 
-            } catch (error) {
-                console.error('Error processing audio:', error);
-                setRecordingStatus('Error processing your answer. Please try again.');
+                // Slight delay before starting the first question
+                setTimeout(() => {
+                    speakMessage(questionText);
+                    setIsInterviewStarted(true);
+                }, 1000);
+            } else {
+                throw new Error('Failed to initialize interview');
             }
+        } catch (error) {
+            console.error('Error initializing interview:', error);
+            setIsInterviewActive(false);
+            alert('Failed to start the interview. Please try again later.');
+            navigate('/applied-jobs');
+        } finally {
+            setIsInitializing(false);
+        }
+    }, [jobId, candidateId, navigate, speakMessage]);
+
+    // Initialize interview on component mount
+    useEffect(() => {
+        initializeInterview();
+        
+        return () => {
+            // Clean up all resources when component unmounts
+            cleanupAudioResources();
         };
-    }
-};
-
-
-
-
-    // ... Keep all  existing styles ...
+    }, [initializeInterview, cleanupAudioResources]);
 
     return (
         <div style={{
@@ -747,7 +779,6 @@ const stopRecordingAndSend = async () => {
             minHeight: '100vh',
             padding: '20px'
         }}>
-            
             {/* Header */}
             <div style={{
                 display: 'flex',
@@ -757,11 +788,8 @@ const stopRecordingAndSend = async () => {
             }}>
                 <CompanyLogo />
                 <div style={{ textAlign: 'center' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <h2>Technical Interview</h2>
-                    {console.log("candidate name is",{candidateName})}
-                    <div>Candidate: {candidateName || 'Loading...'} | Position: {jobTitle}</div>
-                </div>
+                    <h2>Technical Intervieww</h2>
+                    <div>Candidate: {candidateName || 'Loading...'} | Position: {jobTitle || 'Technical Role'}</div>
                 </div>
                 <div>{new Date().toLocaleString()}</div>
             </div>
@@ -778,44 +806,54 @@ const stopRecordingAndSend = async () => {
                 boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                 padding: '20px'
             }}>
-               
+                {/* Webcam Feed */}
                 <div style={{ flex: 2 }}>
                     <WebcamFeed />
                 </div>
 
+                {/* Chat Interface */}
                 <div style={{ flex: 3 }}>
-                    <InterviewTimer duration={600} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <InterviewTimer duration={600} />
+                        <div style={{ textAlign: 'right' }}>
+                            <div>Questions: {questionCount}/9</div>
+                        </div>
+                    </div>
 
+                    {/* Question and Answer Display */}
                     <div style={{
                         height: '200px',
                         overflowY: 'auto',
                         border: '1px solid #ddd',
-                        padding: '10px',
+                        padding: '15px',
                         borderRadius: '8px',
-                        marginBottom: '10px'
+                        marginBottom: '15px',
+                        backgroundColor: '#f9f9f9'
                     }}>
-                        <div style={{ marginBottom: '10px' }}>
-                            <strong>Question:</strong> {displayedQuestion}
-                            {isSpeaking && <span className="cursor">|</span>}
+                        <div style={{ marginBottom: '15px' }}>
+                            <strong style={{ color: '#3498db' }}>Question:</strong> {displayedQuestion}
+                            {isSpeaking && <span className="cursor" style={{ animation: 'blink 1s infinite' }}>|</span>}
                         </div>
                         <div>
-                            <strong>Your Answer:</strong> {currentAnswer}
+                            <strong style={{ color: '#2ecc71' }}>Your Answer:</strong> {currentAnswer}
                         </div>
                     </div>
 
+                    {/* Recording Status */}
                     {isRecording && (
                         <div style={{
                             textAlign: 'center',
                             margin: '10px 0',
-                            fontStyle: 'italic',
-                            color: 'red',
+                            padding: '8px',
+                            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                            borderRadius: '5px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
                             <div style={{
-                                width: '10px',
-                                height: '10px',
+                                width: '12px',
+                                height: '12px',
                                 backgroundColor: 'red',
                                 borderRadius: '50%',
                                 marginRight: '10px',
@@ -825,6 +863,7 @@ const stopRecordingAndSend = async () => {
                         </div>
                     )}
 
+                    {/* Animations */}
                     <style>
                         {`
                         @keyframes pulse {
@@ -832,73 +871,95 @@ const stopRecordingAndSend = async () => {
                             50% { opacity: 0.5; }
                             100% { opacity: 1; }
                         }
+                        @keyframes blink {
+                            0%, 100% { opacity: 1; }
+                            50% { opacity: 0; }
+                        }
                         `}
                     </style>
 
+                    {/* Controls */}
                     <div style={{
                         display: 'flex',
-                        justifyContent: 'center',
+                        justifyContent: 'space-between',
                         marginTop: '20px'
                     }}>
-                        <button
-                            onClick={stopRecordingAndSend}
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: 'red',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                cursor: 'pointer',
-                                marginRight: '10px'
-                            }}
-                            disabled={!isRecording}
-                        >
-                            Stop Recording & Send
-                        </button>
-
-                        {/* <button
-                            onClick={resetInterview}
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#4CAF50',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Reset Interview
-                        </button> */}
-                        
+                        {isInitializing ? (
+                            <div style={{
+                                width: '100%',
+                                textAlign: 'center',
+                padding: '15px',
+                borderRadius: '8px',
+                backgroundColor: '#f0f0f0'
+                
+                            }}>
+                            <span>Initializing interview...</span>
+                        </div>
+                        ) : isRecording ? (
+                            <button 
+                                onClick={stopRecordingAndSend}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: '#e74c3c',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    fontSize: '16px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Stop Recording
+                            </button>
+                        ) : isInterviewStarted ? (
+                            <div style={{
+                                width: '100%',
+                                textAlign: 'center',
+                                padding: '15px',
+                                borderRadius: '8px',
+                                backgroundColor: '#f0f0f0'
+                            }}>
+                                {isSpeaking ? 'Please wait while the interviewer is speaking...' : 'Processing...'}
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={initializeInterview}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: '#3498db',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    fontSize: '16px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Start Interview
+                            </button>
+                        )}
                     </div>
-                    
                 </div>
-                {/* <div className="text-end">
-                        <h2>Technical Interview</h2>
-                        <div>Questions Asked: {questionCount}/9</div>
-                    </div> */}
             </div>
-            
+
+            {/* Hidden audio element for playback */}
+            <audio ref={audioRef} style={{ display: 'none' }} />
+
+            {/* Status Messages */}
+            {interviewEnded && (
+                <div style={{
+                    marginTop: '20px',
+                    padding: '15px',
+                    backgroundColor: '#d4edda',
+                    borderRadius: '5px',
+                    textAlign: 'center'
+                }}>
+                    <h3>Interview Complete</h3>
+                    <p>Thank you for participating. You will be redirected shortly.</p>
+                </div>
+            )}
         </div>
-        
     );
-    // Inside Chat component, after the existing useEffect
-    // Voice loading useEffect
-    // useEffect(() => {
-    //     const loadVoices = () => {
-    //         console.log('Voices loaded:', synthesisRef.current.getVoices().length);
-    //     };
-
-    //     if (synthesisRef.current) {
-    //         synthesisRef.current.onvoiceschanged = loadVoices;
-            
-    //         if (synthesisRef.current.getVoices().length > 0) {
-    //             loadVoices();
-    //         }
-    //     }
-    // }, []);
 };
-
-
 
 export default Chat;
