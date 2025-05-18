@@ -602,13 +602,24 @@ const AllPosts = () => {
   //   setSearchTerm(e.target.value);
   // };
 
-  if (loading) {
-    return <div className="loading-container"><p className="loading-text">Loading jobs...</p></div>;
-  }
+ if (loading) {
+  return (
+    <div className="loading-container">
+      <span className="loader"></span>
+      <p className="loading-text">Loading jobs, please wait...</p>
+    </div>
+  );
+}
 
-  if (error) {
-    return <div className="error-container"><p className="error-text">Error: {error}</p></div>;
-  }
+if (error) {
+  return (
+    <div className="error-container">
+      <span className="error-icon">⚠️</span>
+      <p className="error-text">Oops! Failed to load jobs.<br />{error}</p>
+    </div>
+  );
+}
+
 
   return (
     
