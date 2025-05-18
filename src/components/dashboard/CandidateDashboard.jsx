@@ -368,7 +368,6 @@ if (error) {
               </div>
             </div>
             
-            <Link to="/applied-jobs" className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <CheckCircleIcon   className="recruiter-dashboard__icon-container recruiter-dashboard__icon-green" />
@@ -378,9 +377,7 @@ if (error) {
                   <p className="ts-card-value">{interviewCount}</p>
                 </div>
               </div>
-            </Link>
             
-            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <TimerIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple" />
@@ -390,9 +387,7 @@ if (error) {
                   <p className="ts-card-value">{pendingInterviewCount}</p>
                 </div>
               </div>
-            </Link>
 
-            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <PauseCircleIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-orange" />
@@ -402,7 +397,6 @@ if (error) {
                   <p className="ts-card-value">{incompletedInterviewCount}</p>
                 </div>
               </div>
-            </Link>
             
           </div>
           
