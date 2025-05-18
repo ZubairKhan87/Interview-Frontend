@@ -356,10 +356,7 @@ if (error) {
         <main className="ts-main">
           {/* Summary Cards */}
           <div className="ts-summary-grid">
-            <div className="ts-summary-card">
-
-              
-            </div>
+          
             <div className="ts-summary-card ts-link-card">
 
             <div className="ts-card-content">
