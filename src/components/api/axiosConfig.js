@@ -18,6 +18,7 @@ axiosInstance.interceptors.request.use(
       // Make sure this matches your backend's expected format
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {

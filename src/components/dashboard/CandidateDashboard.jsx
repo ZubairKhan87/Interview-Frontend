@@ -1,14 +1,13 @@
 import React, { useState,useEffect } from 'react';
 import axiosInstance from '../api/axiosConfig';
 import { useUser } from "../context/UserContext";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 import { 
   BriefcaseIcon, PlayIcon, NewspaperIcon, SparklesIcon ,
-  LogOutIcon, BellIcon, UserCircleIcon, SearchIcon,
   CalendarIcon, CheckCircleIcon, ClockIcon, Building2Icon,
   TrendingUpIcon, AwardIcon, MessageSquareIcon,XCircleIcon ,PauseCircleIcon,
   BookOpenIcon, GraduationCapIcon, ScrollIcon, 
-  BarChartIcon, CalendarClockIcon, StarIcon,
   FileTextIcon, MapPinIcon,HourglassIcon ,TimerIcon , UsersIcon, HeartIcon,ChevronRight,ChevronDownIcon,ChevronRightIcon,PlusIcon   
 } from 'lucide-react';
 import "../../styles/CandidateDashboard.css";
@@ -65,7 +64,7 @@ const CandidateDashboard = () => {
         const accessToken = localStorage.getItem('access');
         
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/job_posting/publicposts/', {
+          const response = await fetch(`${BASE_API_URL}/api/job_posting/publicposts/`, {
             headers: {
               'Authorization': `Bearer ${accessToken}`
             }
@@ -210,7 +209,7 @@ const CandidateDashboard = () => {
                 return;
             }
 
-            const response = await axios.get('http://localhost:8000/api/authentication/profile/image/', {
+            const response = await axios.get(`${BASE_API_URL}/api/authentication/profile/image/`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -285,6 +284,7 @@ const handleImageChange = async (event) => {
         return 'success';
       default:
         return '';
+        
     }
   };
 
@@ -296,20 +296,6 @@ const handleImageChange = async (event) => {
     return <div>Error: {error}</div>;
   }
 
-  const savedJobs = [
-    { role: 'Senior Frontend Developer', company: 'Arbisoft', location: 'Islamabad', salary: '$140k-180k' },
-    { role: 'Lead UI Engineer', company: 'Netsol', location: 'Lahore', salary: '$160k-200k' }
-  ];
-
-  const courses = [
-    { title: 'System Design', progress: 70, icon: GraduationCapIcon },
-    { title: 'AWS Certification', progress: 45, icon: ScrollIcon }
-  ];
-
-  const events = [
-    { date: '25', month: 'May', title: 'Open House 2025, Namal', type: 'Campus', time: '9:00 AM' },
-    { date: '26', month: 'May', title: 'Career Fair 2025, Namal', type: 'Campus', time: '10:00 AM' }
-  ];
   
   const handleLogout = () => {
     localStorage.removeItem('username');
