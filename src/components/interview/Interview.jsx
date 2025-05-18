@@ -4,6 +4,7 @@ import axios from 'axios';
 import logo from '../../assets/logo.png';
 import "../../styles/Interview.css";
 const BASE_API_URL = import.meta.env.VITE_API_URL;
+const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
 // Placeholder logo component
 const CompanyLogo = () => (
@@ -492,12 +493,14 @@ const Chat = () => {
         // Set speaking state
         setIsSpeaking(true);
         console.log("spech",import.meta.env.VITE_GROQ_API_KEY)
+        console.log("API KEY:", apiKey); // Should print the actual key
+
         // Call Groq API to generate speech
         fetch("https://api.groq.com/openai/v1/audio/speech", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`
+                "Authorization": `Bearer ${apiKey}`
                 //API_gsk_jFRQkWV7ykR6yzScRxPAWGdyb3FYrQAFHLP2W0ubi2syHxASye7Y
                 //API_gsk_aaViIpcvjGrz3rGpgvGXWGdyb3FYrQikdgA07LsdHKb3fdjFRuIS
                 
