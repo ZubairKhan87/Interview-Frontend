@@ -491,13 +491,13 @@ const Chat = () => {
         
         // Set speaking state
         setIsSpeaking(true);
-        console.log("spech",import.meta.env.GROQ_API_KEY)
+        console.log("spech",import.meta.env.VITE_GROQ_API_KEY)
         // Call Groq API to generate speech
         fetch("https://api.groq.com/openai/v1/audio/speech", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${import.meta.env.GROQ_API_KEY}`
+                "Authorization": `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`
                 //API_gsk_jFRQkWV7ykR6yzScRxPAWGdyb3FYrQAFHLP2W0ubi2syHxASye7Y
                 //API_gsk_aaViIpcvjGrz3rGpgvGXWGdyb3FYrQikdgA07LsdHKb3fdjFRuIS
                 
