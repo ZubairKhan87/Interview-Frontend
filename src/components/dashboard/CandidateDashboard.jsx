@@ -357,6 +357,7 @@ if (error) {
           {/* Summary Cards */}
           <div className="ts-summary-grid">
             <div className="ts-summary-card">
+
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <BriefcaseIcon className="recruiter-dashboard__icon-container recruiter-dashboard__icon-blue" />
@@ -367,7 +368,8 @@ if (error) {
                 </div>
               </div>
             </div>
-            
+                <Link className="ts-summary-card ts-link-card">
+
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <CheckCircleIcon   className="recruiter-dashboard__icon-container recruiter-dashboard__icon-green" />
@@ -377,8 +379,8 @@ if (error) {
                   <p className="ts-card-value">{interviewCount}</p>
                 </div>
               </div>
-            
-            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
+            </Link>
+            <Link className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <TimerIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple" />
@@ -390,7 +392,7 @@ if (error) {
               </div>
             </Link>
 
-            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
+            <Link className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <PauseCircleIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-orange" />
