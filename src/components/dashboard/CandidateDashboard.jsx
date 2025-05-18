@@ -289,12 +289,23 @@ const handleImageChange = async (event) => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
-  }
+  return (
+    <div className="status-container">
+      <span className="loader"></span>
+      <p>Fetching data, please wait...</p>
+    </div>
+  );
+}
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+if (error) {
+  return (
+    <div className="status-container error">
+      <span className="error-icon">⚠️</span>
+      <p>Oops! Something went wrong.<br />{error}</p>
+    </div>
+  );
+}
+
 
   
   const handleLogout = () => {
