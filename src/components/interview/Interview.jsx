@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import logo from '../../assets/logo.png';
 import "../../styles/Interview.css";
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 // Placeholder logo component
 const CompanyLogo = () => (
@@ -68,7 +69,7 @@ const InterviewTimer = ({ duration = 300 }) => {
 
 // Create a separate axios instance for frame uploads
 const frameApi = axios.create({
-    baseURL: 'http://localhost:8000',
+    baseURL: `${BASE_API_URL}`,
     withCredentials: true
 });
 
@@ -299,7 +300,7 @@ const Chat = () => {
     // Use this to update application status on the backend
     const updateApplicationStatus = async (status) => {
         try {
-            await axios.post('http://localhost:8000/api/applications/update-status/', {
+            await axios.post(`${BASE_API_URL}/api/applications/update-status/`, {
                 job_id: jobId,
                 candidate_id: candidateId,
                 status: status
@@ -335,7 +336,7 @@ const Chat = () => {
                 
                 // Attempt to end interview
                 try {
-                    axios.post('http://localhost:8000/api/chat/chat/', {
+                    axios.post(`${BASE_API_URL}/api/chat/chat/`, {
                         job_id: jobId,
                         candidate_id: candidateId
                     });
@@ -380,7 +381,7 @@ const Chat = () => {
             // Clean up audio resources
             cleanupAudioResources();
             
-            await axios.post('http://localhost:8000/api/chat/chat/', {
+            await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
                 job_id: jobId,
                 candidate_id: candidateId
             });
@@ -496,9 +497,10 @@ const Chat = () => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer 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`
+                "Authorization": `Bearer ${import.meta.env.GROQ_API_KEY}`
                 //API_gsk_jFRQkWV7ykR6yzScRxPAWGdyb3FYrQAFHLP2W0ubi2syHxASye7Y
                 //API_gsk_aaViIpcvjGrz3rGpgvGXWGdyb3FYrQikdgA07LsdHKb3fdjFRuIS
+                
             },
             body: JSON.stringify({
                 model: "playai-tts",
@@ -660,7 +662,7 @@ const Chat = () => {
             }
             
             // Send the transcribed text for processing
-            const chatResponse = await axios.post('http://localhost:8000/api/chat/chat/', {
+            const chatResponse = await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
                 message: transcribedText,
                 job_id: jobId,
                 candidate_id: candidateId,
@@ -724,7 +726,7 @@ const Chat = () => {
             }
             
             // Start the interview by requesting the first question
-            const response = await axios.post('http://localhost:8000/api/chat/chat/', {
+            const response = await axios.post(`${BASE_API_URL}/api/chat/chat/`, {
                 reset: true,
                 job_id: jobId,
                 candidate_id: candidateId
