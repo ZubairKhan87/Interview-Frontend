@@ -378,7 +378,7 @@ if (error) {
                 </div>
               </div>
             
-            <Link className="ts-summary-card ts-link-card">
+            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <TimerIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-purple" />
@@ -390,7 +390,7 @@ if (error) {
               </div>
             </Link>
 
-            <Link className="ts-summary-card ts-link-card">
+            <Link to="/interview/completed" className="ts-summary-card ts-link-card">
               <div className="ts-card-content">
                 <div className="ts-card-icon">
                   <PauseCircleIcon    className="recruiter-dashboard__icon-container recruiter-dashboard__icon-orange" />
