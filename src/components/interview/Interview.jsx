@@ -492,9 +492,7 @@ const Chat = () => {
         
         // Set speaking state
         setIsSpeaking(true);
-        console.log("spech",import.meta.env.VITE_GROQ_API_KEY)
-        console.log("API KEY:", apiKey); // Should print the actual key
-
+       
         // Call Groq API to generate speech
         fetch("https://api.groq.com/openai/v1/audio/speech", {
             method: "POST",
