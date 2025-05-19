@@ -180,6 +180,8 @@ const ProfilePage = () => {
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+
             // Don't set Content-Type here, axios will do it automatically for FormData
           },
         }
@@ -324,6 +326,7 @@ const ProfilePage = () => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "multipart/form-data",
+          
         },
       });
 
